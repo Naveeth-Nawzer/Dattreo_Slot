@@ -3,6 +3,11 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import TrackQueue from './BookingComponents/TrackQueue'
+import Profile from './UserProfile/Profile'
+import LanguageSelection from './UserProfile/LanguageSelection'
+import Firstvist from './UserProfile/Firstvist'
+import Register from './BookingComponents/Register'
+
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -10,11 +15,16 @@ function App() {
 
   return (
     <>
-    <BrowserRouter> <Routes>    
+    <BrowserRouter> 
+    <Routes>    
     <Route path='/' element={<TrackQueue />} />
-    
-    
-    </Routes> </BrowserRouter>
+    <Route path='/profile' element={<Profile/>} />
+    <Route path='/LanguageSelection' element={<LanguageSelection/>} />
+    <Route path='/Firstvist' element={<Firstvist/>} />
+    <Route path='/Register' element={<Register/>} />
+
+    </Routes> 
+    </BrowserRouter>
     </>
   )
 }
