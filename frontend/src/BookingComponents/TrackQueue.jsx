@@ -255,17 +255,12 @@ const TrackQueue = ({ userId }) => {
       }
 
       const slotsData = response.data.data;
-      // Debug: inspect slots after booking
-      // eslint-disable-next-line no-console
-      console.log('Queue slots:', slotsData);
       setSlots(slotsData);
       setTotalSpots(slotsData.length);
 
-      // Find currently serving slot
       const serving = slotsData.find(slot => (slot.status || '').toLowerCase() === 'serving');
       setCurrentServing(serving ? serving.slot_number : null);
 
-      // Find user's position
       if (effectiveUserId) {
         const userSlot = slotsData.find(slot => slot.user_id === effectiveUserId);
         if (userSlot) {
@@ -292,14 +287,12 @@ const TrackQueue = ({ userId }) => {
     return () => clearInterval(interval);
   }, [effectiveUserId]);
 
-  // Give an immediate refresh on arrival after booking (in case the 10s interval hasn't fired yet)
   useEffect(() => {
     if (slotIdFromQuery) {
       fetchQueue();
     }
   }, [slotIdFromQuery]);
 
-  // Optimistic update to show booked status immediately after redirect
   useEffect(() => {
     if (!slotIdFromQuery || !effectiveUserId || optimisticAppliedRef.current) return;
     const idNum = parseInt(slotIdFromQuery, 10);
@@ -314,13 +307,16 @@ const TrackQueue = ({ userId }) => {
       return;
     }
 
-    setSlots(prev => prev.map(s => s.id === idNum ? { ...s, status: 'booked', user_id: effectiveUserId } : s));
+    setSlots(prev => prev.map(s => 
+      s.id === idNum ? { ...s, status: 'booked', user_id: effectiveUserId } : s
+    ));
     optimisticAppliedRef.current = true;
   }, [slotIdFromQuery, effectiveUserId, slots]);
 
   const goToBooking = (slotId) => {
     navigate(`/BookingAppointment?slotId=${slotId}`);
   };
+
   const calculateWaitTime = () => {
     if (userPosition === null || currentServing === null) return 'Unknown';
     const position = userPosition - (currentServing || 0);
@@ -397,15 +393,18 @@ const TrackQueue = ({ userId }) => {
               {slots.map((slot) => {
                 let spotClass = "bg-gray-200";
                 let iconClass = "text-gray-500";
-  
-                if (effectiveUserId && slot.user_id === effectiveUserId) {
+
+                const status = (slot.status || '').toLowerCase();
+                const isUserSlot = effectiveUserId && slot.user_id === effectiveUserId;
+
+                if (isUserSlot) {
                   spotClass = "bg-yellow-100 border-2 border-yellow-400";
                   iconClass = "text-yellow-600";
-                } else if ((slot.status || '').toLowerCase() === 'serving') {
+                } else if (status === 'serving') {
                   spotClass = "bg-teal-100 border-2 border-teal-400";
                   iconClass = "text-teal-600";
-                } else if ((slot.status || '').toLowerCase() === 'booked') {
-                  spotClass = "bg-red-100";
+                } else if (status === 'booked') {
+                  spotClass = "bg-red-100 border border-red-300";
                   iconClass = "text-red-600";
                 }
 
@@ -414,8 +413,8 @@ const TrackQueue = ({ userId }) => {
                     key={slot.id}
                     className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm ${spotClass}`}
                     title={`Position ${slot.slot_number + 1}`}
-                    onClick={() => (slot.status || '').toLowerCase() === 'available' && goToBooking(slot.id)}
-                    disabled={(slot.status || '').toLowerCase() !== 'available'}
+                    onClick={() => status === 'available' && goToBooking(slot.id)}
+                    disabled={status !== 'available'}
                   >
                     <User size={18} className={iconClass} />
                   </button>
