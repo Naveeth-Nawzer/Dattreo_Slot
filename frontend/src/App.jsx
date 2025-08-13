@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import TrackQueue from './BookingComponents/TrackQueue'
 import BookingAppointment from './BookingComponents/BookingAppointment'
 import MyAppointment from './BookingComponents/MyAppointment'
@@ -10,7 +9,7 @@ import Profile from './UserProfile/Profile'
 import LanguageSelection from './UserProfile/LanguageSelection'
 import Firstvist from './UserProfile/Firstvist'
 import Register from './BookingComponents/Register'
-
+import SignIn from './UserProfile/SignIn'
 import Home from './Home'
 import OnboardingPage from './OnboardingPage'
 import OnboardingPage2 from './OnboardingPage2'
@@ -25,8 +24,7 @@ function App() {
 
   return (
     <>
-    <BrowserRouter> 
-    <Routes>    
+    <BrowserRouter> <Routes>    
     <Route path='/' element={<TrackQueue />} />
     <Route path='/admin' element={<Dashboard />} />  
     <Route path='/adminnotifications' element={<AdminNotifications />} />  
@@ -39,7 +37,7 @@ function App() {
     <Route path='/LanguageSelection' element={<LanguageSelection/>} />
     <Route path='/Firstvist' element={<Firstvist/>} />
     <Route path='/Register' element={<Register/>} />
-
+    <Route path='/SignIn' element={<SignIn />}/>
     
     <Route path='/home' element={<Home />} />
     <Route path='/OnboardingPage' element={<OnboardingPage />} />
