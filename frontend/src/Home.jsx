@@ -8,7 +8,7 @@ function Home() {
   
   return (
     <>
-    <div className="min-h-screen bg-transparent font-sans relative">
+    <div className="bg-transparent font-sans">
       {/* Background SVGs */}
       <TealWaveBackground/>
 
@@ -16,7 +16,7 @@ function Home() {
       <Nav />
 
       {/* Body */}
-      <main className="flex flex-col md:flex-row items-start justify-between px-8 py-12 relative z-10">
+      <main className="flex flex-col md:flex-row items-start justify-between px-8 py-12 fixed z-10">
         {/* Left Content */}
         <div className="max-w-xl text-left">
           <h1 className="text-6xl font-bold leading-tight">

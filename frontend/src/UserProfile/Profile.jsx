@@ -47,7 +47,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen w-full mx-auto font-sans bg-[#f9fcfc] px-8 py-12 flex flex-col lg:flex-row justify-center gap-12 box-border overflow-y-auto">
+    <div className="w-full mx-auto font-sans bg-[#f9fcfc] px-8 py-12 flex flex-col lg:flex-row justify-center gap-12 box-border overflow-y-auto">
       {/* Left Section */}
       <div className="flex-1 max-w-2xl flex flex-col items-center lg:items-start px-4">
         <div className="text-center lg:text-left mb-12">
