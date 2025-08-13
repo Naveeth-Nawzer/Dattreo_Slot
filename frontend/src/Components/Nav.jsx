@@ -1,8 +1,15 @@
 import React from 'react'
 import slot from "../assets/slot.png"
 import { GlobeAltIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from 'react-i18next';
+
 
 const Nav = () => {
+    const { t, i18n } = useTranslation();
+  
+    const changeLanguage = (lng) => {
+      i18n.changeLanguage(lng);
+    };
   return (
     <div>
         <header className="flex items-center justify-between px-8 py-4 bg-[#F7FBFB] rounded-b-3xl relative z-10 ">
@@ -29,10 +36,13 @@ const Nav = () => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center bg-[#4CDBB9] text-white px-2 py-1 rounded-full cursor-pointer">
             <GlobeAltIcon className="w-5 h-5" />
-            <select className="bg-transparent outline-none ml-3">
-              <option>English</option>
-              <option>Tamil</option>
-              <option>Sinhala</option>
+            <select 
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="bg-transparent outline-none ml-3">
+              <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+            <option value="si">සිංහල</option>
             </select>
           </div>
           <UserCircleIcon className="w-8 h-8 text-[#4CDBB9]" />

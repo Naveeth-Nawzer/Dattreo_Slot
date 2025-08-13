@@ -20,19 +20,8 @@ function Home() {
 
         {/* Header */}
         <Nav />
-
-        {/* Language Selector */}
-        <div className="absolute top-4 right-4 z-50">
-          <select 
-            value={i18n.language}
-            onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-white rounded-md px-3 py-1 shadow-md"
-          >
-            <option value="en">English</option>
-            <option value="ta">தமிழ்</option>
-            <option value="si">සිංහල</option>
-          </select>
-        </div>
+      
+        
 
         {/* Body */}
         <main className="flex flex-col md:flex-row items-start justify-between px-8 py-12 relative z-10">
