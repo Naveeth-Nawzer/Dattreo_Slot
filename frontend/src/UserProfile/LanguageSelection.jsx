@@ -1,17 +1,18 @@
 import React from "react";
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
 
 export default function LanguageSelection() {
   const languages = ["English", "Tamil", "Sinhala"];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white relative overflow-hidden">
-      {/* Decorative background strokes */}
-      <div className="absolute inset-0">
-        {/* Add SVG or images for green strokes */}
-      </div>
+    <div className="flex items-center justify-center bg-transparent relative overflow-hidden fixed ">
+      <TealWaveBackground/>
+      <BrushTealWaves/>
+      
 
       {/* Main container */}
-      <div className="bg-[#F7FBFB] p-20 rounded-3xl shadow-lg text-center z-10 w-[800px]">
+      <div className="bg-[#F7FBFB] p-20 rounded-3xl shadow-lg text-center z-10 w-[800px] mt-[120px]">
         <h2 className="text-5xl font-medium mb-4">Select your</h2>
         <h2 className="text-5xl font-bold text-[#0A8F70] mb-14">
           Prefer Language

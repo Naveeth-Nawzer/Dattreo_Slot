@@ -6,7 +6,7 @@ import Profile from './UserProfile/Profile'
 import LanguageSelection from './UserProfile/LanguageSelection'
 import Firstvist from './UserProfile/Firstvist'
 import Register from './BookingComponents/Register'
-
+import SignIn from './UserProfile/SignIn'
 import Home from './Home'
 import OnboardingPage from './OnboardingPage'
 import OnboardingPage2 from './OnboardingPage2'
@@ -22,7 +22,7 @@ function App() {
     <Route path='/LanguageSelection' element={<LanguageSelection/>} />
     <Route path='/Firstvist' element={<Firstvist/>} />
     <Route path='/Register' element={<Register/>} />
-
+    <Route path='/SignIn' element={<SignIn />}/>
     
     <Route path='/home' element={<Home />} />
     <Route path='/OnboardingPage' element={<OnboardingPage />} />
