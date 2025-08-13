@@ -8,6 +8,9 @@ import LanguageSelection from './UserProfile/LanguageSelection'
 import Firstvist from './UserProfile/Firstvist'
 import Register from './BookingComponents/Register'
 
+import Home from './Home'
+import OnboardingPage from './OnboardingPage'
+import OnboardingPage2 from './OnboardingPage2'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -23,8 +26,13 @@ function App() {
     <Route path='/Firstvist' element={<Firstvist/>} />
     <Route path='/Register' element={<Register/>} />
 
-    </Routes> 
-    </BrowserRouter>
+    
+    <Route path='/home' element={<Home />} />
+    <Route path='/OnboardingPage' element={<OnboardingPage />} />
+    <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
+
+
+    </Routes> </BrowserRouter>
     </>
   )
 }
