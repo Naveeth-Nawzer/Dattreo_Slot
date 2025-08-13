@@ -7,7 +7,7 @@ import BookingAppointment from './BookingComponents/BookingAppointment'
 import MyAppointment from './BookingComponents/MyAppointment'
 import Finder from './Admin/Finder'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { User } from "lucide-react";
+import SlotConfig from './Admin/SlotConfig';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -19,6 +19,7 @@ function App() {
     <Route path='/BookingAppointment' element={<BookingAppointment />} />
     <Route path='/MyAppointment' element={<MyAppointment />} />
     <Route path='/Finder' element={<Finder />} />
+    <Route path='/SlotConfig' element={<SlotConfig />} />
     
     
     </Routes> </BrowserRouter>
