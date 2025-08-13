@@ -7,6 +7,7 @@ import Profile from './UserProfile/Profile'
 import LanguageSelection from './UserProfile/LanguageSelection'
 import Firstvist from './UserProfile/Firstvist'
 import Register from './BookingComponents/Register'
+import AdminDashboard from './Admin/admin'
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ function App() {
     <Route path='/LanguageSelection' element={<LanguageSelection/>} />
     <Route path='/Firstvist' element={<Firstvist/>} />
     <Route path='/Register' element={<Register/>} />
+    <Route path='/admin' element={<AdminDashboard />}/>
 
     </Routes> 
     </BrowserRouter>
