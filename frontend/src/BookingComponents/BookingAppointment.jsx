@@ -1,422 +1,8 @@
-// import React, { useState } from "react";
-// import axios from "axios";
-
-// export default function BookingAppointment() {
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     NIC: "",
-//     number: "",
-//     hospital: "",
-//     department: "",
-//     date: "",
-//     time: ""
-//   });
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [success, setSuccess] = useState(false);
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData(prev => ({
-//       ...prev,
-//       [name]: value
-//     }));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setError(null);
-//     setSuccess(false);
-
-//     try {
-//       const response = await axios.post("http://localhost:5001/api/createBooking", {
-//         name: formData.name,
-//         NIC: formData.NIC,
-//         number: formData.number,
-//         hospital: formData.hospital,
-//         department: formData.department
-//       });
-
-//       setSuccess(true);
-//       // Reset form after successful submission
-//       setFormData({
-//         name: "",
-//         NIC: "",
-//         number: "",
-//         hospital: "",
-//         department: "",
-//         date: "",
-//         time: ""
-//       });
-//     } catch (err) {
-//       setError(err.response?.data?.error || "Failed to book appointment");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-white flex flex-col items-center p-6">
-//       {/* Heading */}
-//       <div className="w-full max-w-lg">
-//         <h1 className="text-5xl font-bold text-teal-500">Booking</h1>
-//         <h2 className="text-4xl font-bold text-black mt-1">Appointment</h2>
-//         <p className="mt-1 text-gray-600">Book slot with date & time</p>
-//         <hr className="my-6" />
-//       </div>
-
-//       {/* Form */}
-//       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4">
-//         <h3 className="text-center text-teal-500 text-lg font-semibold mb-6">Booking Form</h3>
-
-//         {error && (
-//           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-//             {error}
-//           </div>
-//         )}
-
-//         {success && (
-//           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-//             Appointment booked successfully!
-//           </div>
-//         )}
-
-//         <input 
-//           type="text" 
-//           name="name"
-//           placeholder="name" 
-//           value={formData.name}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-//         <input 
-//           type="text" 
-//           name="NIC"
-//           placeholder="NIC" 
-//           value={formData.NIC}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//           minLength="10"
-//         />
-//         <input 
-//           type="text" 
-//           name="number"
-//           placeholder="mobile number" 
-//           value={formData.number}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//           minLength="10"
-//         />
-//         <input 
-//           type="text" 
-//           name="hospital"
-//           placeholder="hospital" 
-//           value={formData.hospital}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-//         <input 
-//           type="text" 
-//           name="department"
-//           placeholder="department" 
-//           value={formData.department}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-
-//         <div className="grid grid-cols-2 gap-4">
-//           <input 
-//             type="date" 
-//             name="date"
-//             value={formData.date}
-//             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           />
-//           <input 
-//             type="time" 
-//             name="time"
-//             value={formData.time}
-//             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           />
-//         </div>
-
-//         <button 
-//           type="submit" 
-//           disabled={loading}
-//           className={`w-full ${loading ? 'bg-gray-300' : 'bg-gray-100 hover:bg-teal-500 hover:text-white'} transition-colors py-3 rounded-lg font-semibold`}
-//         >
-//           {loading ? 'Booking...' : 'Book Now'}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { useNavigate, useLocation } from "react-router-dom"; // For navigation and slotId
-
-// export default function BookingAppointment() {
-//   const navigate = useNavigate(); // Initialize navigation
-//   const locationHook = useLocation();
-//   const params = new URLSearchParams(locationHook.search);
-//   const slotId = params.get('slotId');
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     NIC: "",
-//     number: "",
-//     hospital: "",
-//     department: "",
-//     date: "",
-//     time: "",
-//     location: "" // Added location field
-//   });
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [success, setSuccess] = useState(false);
-//   const [configLoading, setConfigLoading] = useState(true);
-//   const [availableLocations, setAvailableLocations] = useState([]);
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData(prev => ({
-//       ...prev,
-//       [name]: value
-//     }));
-//   };
-
-//   useEffect(() => {
-//     const fetchConfig = async () => {
-//       try {
-//         setConfigLoading(true);
-//         const res = await axios.get('http://localhost:5001/api/slots/config');
-//         if (res.data?.success) {
-//           const loc = res.data.location || '';
-//           setAvailableLocations(loc ? [loc] : []);
-//           if (loc) {
-//             setFormData(prev => ({ ...prev, location: loc }));
-//           }
-//         }
-//       } catch (err) {
-//         // Leave locations empty; user can still choose manually if options exist
-//       } finally {
-//         setConfigLoading(false);
-//       }
-//     };
-//     fetchConfig();
-//   }, []);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setError(null);
-//     setSuccess(false);
-
-//     // Validate all fields including date and time
-//     if (!formData.date || !formData.time || !formData.location) {
-//       setError("Please fill all fields including date, time, and location");
-//       setLoading(false);
-//       return;
-//     }
-
-//     try {
-//       // First create the patient booking
-//       const bookingResponse = await axios.post("http://localhost:5001/api/createBooking", {
-//         name: formData.name,
-//         NIC: formData.NIC,
-//         number: formData.number,
-//         hospital: formData.hospital,
-//         department: formData.department,
-//         location: formData.location
-//       });
-
-//       if (bookingResponse.data?.patient) {
-//         // Then book the selected slot by id
-//         if (!slotId) {
-//           throw new Error("Missing slotId from selection");
-//         }
-
-//         const userId = bookingResponse.data.patient.id;
-//         const slotResponse = await axios.post(`http://localhost:5001/api/slots/${slotId}/book`, {
-//           user_id: userId,
-//           location: formData.location
-//         });
-
-//         if (slotResponse.data?.success) {
-//           setSuccess(true);
-//           // Reset form after successful submission
-//           setFormData({
-//             name: "",
-//             NIC: "",
-//             number: "",
-//             hospital: "",
-//             department: "",
-//             date: "",
-//             time: "",
-//             location: ""
-//           });
-          
-//           // Navigate to tracking page after 2 seconds
-//           setTimeout(() => {
-//             navigate(`/?userId=${userId}&slotId=${slotId}`);
-//           }, 2000);
-//         } else {
-//           throw new Error(slotResponse.data?.message || "Slot booking failed");
-//         }
-//       } else {
-//         throw new Error("Patient registration failed");
-//       }
-//     } catch (err) {
-//       setError(err.response?.data?.error || err.response?.data?.message || err.message || "Failed to complete booking");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-white flex flex-col items-center p-6">
-//       {/* Heading */}
-//       <div className="w-full max-w-lg">
-//         <h1 className="text-5xl font-bold text-teal-500">Booking</h1>
-//         <h2 className="text-4xl font-bold text-black mt-1">Appointment</h2>
-//         <p className="mt-1 text-gray-600">Book slot with date & time</p>
-//         <hr className="my-6" />
-//       </div>
-
-//       {/* Form */}
-//       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4">
-//         <h3 className="text-center text-teal-500 text-lg font-semibold mb-6">Booking Form</h3>
-
-//         {error && (
-//           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-//             {error}
-//           </div>
-//         )}
-
-//         {success && (
-//           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-//             Appointment booked successfully! Redirecting...
-//           </div>
-//         )}
-
-//         <input 
-//           type="text" 
-//           name="name"
-//           placeholder="Name" 
-//           value={formData.name}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-//         <input 
-//           type="text" 
-//           name="NIC"
-//           placeholder="NIC" 
-//           value={formData.NIC}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//           minLength="10"
-//         />
-//         <input 
-//           type="tel" 
-//           name="number"
-//           placeholder="Mobile Number" 
-//           value={formData.number}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//           minLength="10"
-//         />
-//         <input 
-//           type="text" 
-//           name="hospital"
-//           placeholder="Hospital" 
-//           value={formData.hospital}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-//         <input 
-//           type="text" 
-//           name="department"
-//           placeholder="Department" 
-//           value={formData.department}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//           required
-//         />
-        
-//         {/* Location Select (pre-filled from slot config if available) */}
-//         <select
-//           name="location"
-//           value={formData.location}
-//           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-//           required
-//           disabled={configLoading || (availableLocations.length === 1)}
-//         >
-//           <option value="">Select Location</option>
-//           {availableLocations.map((loc) => (
-//             <option key={loc} value={loc}>{loc}</option>
-//           ))}
-//           {/* fallback options if no config present */}
-//           {availableLocations.length === 0 && (
-//             <>
-//               <option value="Main Building">Main Building</option>
-//               <option value="Emergency Wing">Emergency Wing</option>
-//               <option value="Pediatrics">Pediatrics</option>
-//               <option value="Cardiology">Cardiology</option>
-//             </>
-//           )}
-//         </select>
-
-//         <div className="grid grid-cols-2 gap-4">
-//           <input 
-//             type="date" 
-//             name="date"
-//             value={formData.date}
-//             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//             required
-//             min={new Date().toISOString().split('T')[0]} // Disable past dates
-//           />
-//           <input 
-//             type="time" 
-//             name="time"
-//             value={formData.time}
-//             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
-//             required
-//             min="08:00" 
-//             max="17:00"
-//           />
-//         </div>
-
-//         <button 
-//           type="submit" 
-//           disabled={loading}
-//           className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold`}
-//         >
-//           {loading ? 'Booking...' : 'Book Now'}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { QRCodeCanvas } from 'qrcode.react';
+import PropTypes from 'prop-types';
 
 // Configure axios instance
 const api = axios.create({
@@ -428,14 +14,23 @@ const api = axios.create({
   }
 });
 
-export default function BookingAppointment() {
+// Constants
+const MIN_NIC_LENGTH = 10;
+const MIN_PHONE_LENGTH = 10;
+const WORKING_HOURS = {
+  start: "08:00",
+  end: "17:00"
+};
+
+const BookingAppointment = () => {
   const navigate = useNavigate();
   const locationHook = useLocation();
   const params = new URLSearchParams(locationHook.search);
   const slotId = params.get('slotId');
+  
   const [formData, setFormData] = useState({
     name: "",
-    NIC: "",
+    nic: "",
     number: "",
     hospital: "",
     department: "",
@@ -443,6 +38,7 @@ export default function BookingAppointment() {
     time: "",
     location: ""
   });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -452,39 +48,41 @@ export default function BookingAppointment() {
   const [bookingInfo, setBookingInfo] = useState(null);
   const qrCodeRef = useRef(null);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
-
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        setConfigLoading(true);
-        const res = await api.get('/slots/config');
-        if (res.data?.success) {
-          const loc = res.data.location || '';
-          setAvailableLocations(loc ? [loc] : []);
-          if (loc) {
-            setFormData(prev => ({ ...prev, location: loc }));
-          }
-        }
-      } catch (err) {
-        console.error('Config fetch error:', err);
-      } finally {
-        setConfigLoading(false);
-      }
-    };
-    fetchConfig();
   }, []);
 
-  const downloadQRCode = () => {
+  const fetchConfig = useCallback(async () => {
+    try {
+      setConfigLoading(true);
+      const res = await api.get('/slots/config');
+      if (res.data?.success) {
+        const loc = res.data.location || '';
+        setAvailableLocations(loc ? [loc] : []);
+        if (loc) {
+          setFormData(prev => ({ ...prev, location: loc }));
+        }
+      }
+    } catch (err) {
+      console.error('Config fetch error:', err);
+    } finally {
+      setConfigLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
+  const downloadQRCode = useCallback(() => {
     if (!qrCodeRef.current) return;
     const canvas = qrCodeRef.current.querySelector('canvas');
     if (!canvas) return;
+    
     const pngUrl = canvas.toDataURL('image/png');
     const downloadLink = document.createElement('a');
     downloadLink.href = pngUrl;
@@ -492,95 +90,122 @@ export default function BookingAppointment() {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-  };
+  }, [bookingInfo]);
 
-  const validateForm = () => {
-    // Clear previous errors
+  const validateForm = useCallback(() => {
     setError(null);
 
-    if (!formData.name.trim()) {
-      setError("Name is required");
-      return false;
-    }
+    const validations = [
+      { condition: !formData.name.trim(), message: "Name is required" },
+      { 
+        condition: !formData.nic.trim() || formData.nic.length < MIN_NIC_LENGTH, 
+        message: `Valid NIC (at least ${MIN_NIC_LENGTH} characters) is required` 
+      },
+      { 
+        condition: !formData.number.trim() || formData.number.length < MIN_PHONE_LENGTH, 
+        message: `Valid phone number (at least ${MIN_PHONE_LENGTH} digits) is required` 
+      },
+      { condition: !formData.hospital.trim(), message: "Hospital is required" },
+      { condition: !formData.department.trim(), message: "Department is required" },
+      { condition: !formData.date, message: "Date is required" },
+      { condition: !formData.time, message: "Time is required" },
+      { condition: !formData.location, message: "Location is required" },
+      { condition: !slotId || isNaN(slotId), message: "Invalid slot selection" }
+    ];
 
-    if (!formData.NIC.trim() || formData.NIC.length < 10) {
-      setError("Valid NIC (at least 10 characters) is required");
-      return false;
-    }
-
-    if (!formData.number.trim() || formData.number.length < 10) {
-      setError("Valid phone number (at least 10 digits) is required");
-      return false;
-    }
-
-    if (!formData.hospital.trim()) {
-      setError("Hospital is required");
-      return false;
-    }
-
-    if (!formData.department.trim()) {
-      setError("Department is required");
-      return false;
-    }
-
-    if (!formData.date) {
-      setError("Date is required");
-      return false;
-    }
-
-    if (!formData.time) {
-      setError("Time is required");
-      return false;
-    }
-
-    if (!formData.location) {
-      setError("Location is required");
-      return false;
-    }
-
-    if (!slotId || isNaN(slotId)) {
-      setError("Invalid slot selection");
+    const failedValidation = validations.find(v => v.condition);
+    if (failedValidation) {
+      setError(failedValidation.message);
       return false;
     }
 
     return true;
-  };
+  }, [formData, slotId]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
   
     try {
-      console.log("Submitting booking form:", formData);
+      // 1. Prepare the payload with exact field names expected by backend
+      const bookingPayload = {
+        name: formData.name.trim(),
+        NIC: formData.nic.trim(),  // Using uppercase NIC to match backend
+        number: formData.number.trim(),
+        hospital: formData.hospital.trim(),
+        department: formData.department.trim(),
+        location: formData.location || 'Main Office', // Default if empty
+        date: formData.date,
+        time: formData.time,
+        slot_id: parseInt(slotId)  // Ensure slotId is a number
+      };
   
-      // Step 1: Create patient booking
-      const bookingResponse = await api.post("/bookings", formData);
-      console.log("Booking API response:", bookingResponse.data);
+      console.log('Submitting booking payload:', bookingPayload);
   
-      const userId = bookingResponse.data?.patient?.id;
-      if (!userId) {
-        console.error("❌ No patient ID returned from booking API");
-        alert("Booking failed: No patient ID returned");
-        return;
+      // 2. First create the patient booking
+      const bookingResponse = await api.post("/bookings", bookingPayload);
+      
+      if (!bookingResponse.data?.patient?.id) {
+        throw new Error("Patient booking failed - no ID returned");
       }
   
-      // Step 2: Book slot
+      const userId = bookingResponse.data.patient.id;
+  
+      // 3. Then book the slot with the patient ID
       const slotResponse = await api.post(`/slots/${slotId}/book`, {
         user_id: userId,
-        location: formData.location,
+        location: bookingPayload.location
       });
   
-      console.log("Slot booking API response:", slotResponse.data);
+      // 4. Handle successful booking
+      setSuccess(true);
+      setBookingInfo({
+        patient: bookingResponse.data.patient,
+        slot: slotResponse.data.slot
+      });
+      
+      setQrCodeData({
+        bookingId: userId,
+        slotId: slotId,
+        patientName: formData.name,
+        dateTime: `${formData.date} ${formData.time}`,
+        location: formData.location
+      });
   
-      if (slotResponse.data.success) {
-        alert("Booking successful!");
-      }
     } catch (err) {
-      console.error("Booking error:", err.response?.data || err.message);
-      alert(`Booking failed: ${err.response?.data?.error || err.message}`);
-    }
-  };
+      console.error("Booking error details:", {
+        error: err,
+        response: err.response?.data,
+        config: err.config
+      });
   
-
+      let errorMessage = "Booking failed. Please try again.";
+      
+      if (err.response) {
+        // Handle backend validation errors
+        if (err.response.status === 400) {
+          errorMessage = err.response.data?.error || 
+                        err.response.data?.message || 
+                        "Invalid data submitted";
+        } else if (err.response.status === 409) {
+          errorMessage = "This slot is no longer available";
+        }
+      } else if (err.request) {
+        errorMessage = "No response from server. Please check your connection.";
+      }
+  
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [formData, slotId, validateForm]);
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
       {/* Heading */}
@@ -616,16 +241,18 @@ export default function BookingAppointment() {
           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
           required
         />
+        
         <input 
           type="text" 
-          name="NIC"
+          name="nic"
           placeholder="NIC" 
-          value={formData.NIC}
+          value={formData.nic}
           onChange={handleChange}
           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
           required
-          minLength="10"
+          minLength={MIN_NIC_LENGTH}
         />
+        
         <input 
           type="tel" 
           name="number"
@@ -634,8 +261,9 @@ export default function BookingAppointment() {
           onChange={handleChange}
           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
           required
-          minLength="10"
+          minLength={MIN_PHONE_LENGTH}
         />
+        
         <input 
           type="text" 
           name="hospital"
@@ -645,6 +273,7 @@ export default function BookingAppointment() {
           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
           required
         />
+        
         <input 
           type="text" 
           name="department"
@@ -692,8 +321,8 @@ export default function BookingAppointment() {
             onChange={handleChange}
             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
             required
-            min="08:00" 
-            max="17:00"
+            min={WORKING_HOURS.start}
+            max={WORKING_HOURS.end}
           />
         </div>
 
@@ -727,10 +356,10 @@ export default function BookingAppointment() {
             <div className="w-full space-y-2 mb-4">
               <p><strong>Booking ID:</strong> {bookingInfo.patient.id}</p>
               <p><strong>Patient:</strong> {bookingInfo.patient.name}</p>
-              <p><strong>NIC:</strong> {bookingInfo.patient.NIC}</p>
+              <p><strong>NIC:</strong> {bookingInfo.patient.nic}</p>
               <p><strong>Hospital:</strong> {bookingInfo.patient.hospital}</p>
               <p><strong>Department:</strong> {bookingInfo.patient.department}</p>
-              <p><strong>Date & Time:</strong> {new Date(bookingInfo.slot.date_time).toLocaleString()}</p>
+              <p><strong>Date & Time:</strong> {formData.date} {formData.time}</p>
               <p><strong>Location:</strong> {bookingInfo.slot.location}</p>
             </div>
 
@@ -753,4 +382,6 @@ export default function BookingAppointment() {
       )}
     </div>
   );
-}
+};
+
+export default BookingAppointment;

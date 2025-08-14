@@ -184,6 +184,24 @@ exports.createBooking = async (req, res) => {
         patient: existingPatient.rows[0],
       });
     }
+    // In your createBooking function
+if (existingPatient.rows.length > 0) {
+  // Make sure to return ALL needed fields including id
+  const patient = existingPatient.rows[0];
+  return res.status(200).json({
+    success: true,
+    message: "Patient already exists",
+    patient: {
+      id: patient.id, // Ensure this matches slots.user_id type
+      name: patient.name,
+      NIC: patient.nic, // Note case sensitivity
+      number: patient.number,
+      hospital: patient.hospital,
+      department: patient.department,
+      location: patient.location
+    }
+  });
+}
 
     // Insert patient
     const result = await pool.query(
@@ -213,62 +231,85 @@ exports.createBooking = async (req, res) => {
  * Book a slot
  */
 exports.bookSlot = async (req, res) => {
+  const { slotId } = req.params;
+  const { user_id, location } = req.body;
+  const client = await pool.connect();
+
   try {
-    const { slotId } = req.params;
-    const { user_id, location } = req.body;
+    await client.query('BEGIN'); // Start transaction
 
     console.log("📥 Slot booking request body:", req.body);
 
+    // Validate inputs
     if (!user_id || !location) {
+      await client.query('ROLLBACK');
       return res.status(400).json({
+        success: false,
         error: "User ID and location are required",
       });
     }
 
-    // Check slot availability
-    const slot = await pool.query(
-      "SELECT * FROM slots WHERE id = $1 AND lower(status) = 'available'",
+    // 1. Verify patient exists (foreign key check)
+    const patientCheck = await client.query(
+      'SELECT id, nic FROM patients WHERE id = $1',
+      [user_id]
+    );
+
+    if (patientCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: "Patient not found",
+      });
+    }
+
+    // 2. Check and lock slot for update
+    const slot = await client.query(
+      `SELECT * FROM slots 
+       WHERE id = $1 AND status = 'available'
+       FOR UPDATE`, // Lock the row
       [slotId]
     );
 
     if (slot.rows.length === 0) {
-      return res.status(400).json({ error: "Slot not available" });
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        success: false,
+        error: "Slot not available",
+      });
     }
 
-    // Update slot as booked
-    const result = await pool.query(
+    // 3. Update slot status
+    const result = await client.query(
       `UPDATE slots 
-       SET status = 'booked', user_id = $1, location = $2, booked_at = NOW()
-       WHERE id = $3 AND lower(status) = 'available'
+       SET status = 'booked', 
+           user_id = $1, 
+           location = $2, 
+           booked_at = NOW()
+       WHERE id = $3
        RETURNING *`,
       [user_id, location, slotId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(409).json({ error: "Slot not available" });
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        success: false,
+        error: "Slot booking failed",
+      });
     }
 
     const bookedSlot = result.rows[0];
 
-    // Get patient details
-    const patient = await pool.query(
-      "SELECT * FROM patients WHERE id = $1",
-      [user_id]
-    );
-
-    if (patient.rows.length === 0) {
-      return res.status(404).json({ error: "Patient not found" });
-    }
-
-    // Generate QR Code
+    // 4. Generate QR Code
     let qrCodeUrl = null;
     try {
       const qrData = {
         slotId: bookedSlot.id,
         patientId: user_id,
-        patientNIC: patient.rows[0].nic,
+        patientNIC: patientCheck.rows[0].nic,
         dateTime: bookedSlot.date_time || new Date().toISOString(),
-        location: bookedSlot.location || location,
+        location: bookedSlot.location,
         status: "booked",
       };
 
@@ -282,7 +323,8 @@ exports.bookSlot = async (req, res) => {
         errorCorrectionLevel: "H",
       });
 
-      await pool.query(
+      // Update slot with QR code path
+      await client.query(
         "UPDATE slots SET qr_code_path = $1 WHERE id = $2",
         [qrCodePath, bookedSlot.id]
       );
@@ -290,19 +332,36 @@ exports.bookSlot = async (req, res) => {
       qrCodeUrl = `/qrcodes/${qrFilename}`;
     } catch (qrErr) {
       console.error("QR generation failed:", qrErr);
+      // Don't fail the booking if QR generation fails
     }
+
+    await client.query('COMMIT'); // Commit transaction
 
     res.status(200).json({
       success: true,
       slot: bookedSlot,
       qrCodeUrl,
+      patient: patientCheck.rows[0], // Include patient details
     });
+
   } catch (err) {
-    console.error(err.message);
+    await client.query('ROLLBACK'); // Rollback on error
+    console.error("Slot booking error:", err.message);
+
+    // Handle specific error cases
+    let errorMessage = "Server error during slot booking";
+    if (err.code === '23503') { // Foreign key violation
+      errorMessage = "Invalid patient reference";
+    } else if (err.code === '23505') { // Unique violation
+      errorMessage = "Slot already booked";
+    }
+
     res.status(500).json({
-      error: "Server error during slot booking",
-      details:
-        process.env.NODE_ENV === "development" ? err.message : undefined,
+      success: false,
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? err.message : undefined,
     });
+  } finally {
+    client.release(); // Release client back to pool
   }
 };
