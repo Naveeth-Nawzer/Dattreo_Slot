@@ -19,22 +19,6 @@ import AdminNotifications from './Admin/AdminNotification';
 import Signup from './pages/Signup';
 import SlotConfig from './Admin/SlotConfig';
 import i18n from './i18n';
-import { useState } from 'react'
-import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import TrackQueue from './BookingComponents/TrackQueue'
-import Profile from './UserProfile/Profile'
-import LanguageSelection from './UserProfile/LanguageSelection'
-import Firstvist from './UserProfile/Firstvist'
-import Register from './BookingComponents/Register'
-import SignIn from './UserProfile/SignIn'
-import Home from './Home'
-import OnboardingPage from './OnboardingPage'
-import OnboardingPage2 from './OnboardingPage2'
-import BookingAppointment from './BookingComponents/BookingAppointment'
-import MyAppointment from './BookingComponents/MyAppointment'
-import Finder from './Admin/Finder'
-import SlotConfig from './Admin/SlotConfig';
 
 function App() {
   const [count, setCount] = useState(0);
