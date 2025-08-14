@@ -7,6 +7,7 @@ const PORT = 5001;
 const slot = require("./routes/SlotsRoutes");
 const bookingRoutes = require('./routes/BookingRoutes');
 const path = require('path');
+const UserOperation = require('./Controllers/UserOperation');
 
 app.use(cors());
 app.use(express.json());
@@ -16,7 +17,7 @@ app.use('/qrcodes', express.static(path.join(__dirname, 'public/qrcodes')));
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
-
+app.use('/UserOperation', UserOperation);
 
 app.use("/api/slots", slot);
 app.use('/api', bookingRoutes);

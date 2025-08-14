@@ -29,7 +29,7 @@ const Nav = () => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center bg-[#4CDBB9] text-white px-2 py-1 rounded-full cursor-pointer">
             <GlobeAltIcon className="w-5 h-5" />
-            <select className="bg-transparent outline-none ml-3">
+            <select className="bg-teal-300 bg-clip-text outline-none ml-3">
               <option>English</option>
               <option>Tamil</option>
               <option>Sinhala</option>
