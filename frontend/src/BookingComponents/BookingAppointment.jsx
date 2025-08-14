@@ -435,7 +435,7 @@ export default function BookingAppointment() {
   const slotId = params.get('slotId');
   const [formData, setFormData] = useState({
     name: "",
-    NIC: "",
+    nic: "",
     number: "",
     hospital: "",
     department: "",
@@ -545,38 +545,111 @@ export default function BookingAppointment() {
 
     return true;
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setQrCodeData(null);
+    setBookingInfo(null);
+  
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
   
     try {
-      console.log("Submitting booking form:", formData);
-  
-      // Step 1: Create patient booking
-      const bookingResponse = await api.post("/bookings", formData);
-      console.log("Booking API response:", bookingResponse.data);
-  
-      const userId = bookingResponse.data?.patient?.id;
-      if (!userId) {
-        console.error("❌ No patient ID returned from booking API");
-        alert("Booking failed: No patient ID returned");
-        return;
+      // Verify slot exists and is available
+      const slotCheck = await api.get(`/slots/${slotId}/status`);
+      if (!slotCheck.data?.available) {
+        throw new Error(slotCheck.data?.message || "This slot is no longer available");
       }
   
-      // Step 2: Book slot
-      const slotResponse = await api.post(`/slots/${slotId}/book`, {
-        user_id: userId,
-        location: formData.location,
+      // Create patient booking (fixed endpoint)
+      const bookingResponse = await api.post("/api/bookings", {
+        name: formData.name.trim(),
+        NIC: formData.NIC.trim(),
+        number: formData.number.trim(),
+        hospital: formData.hospital.trim(),
+        department: formData.department.trim(),
+        location: formData.location
       });
   
-      console.log("Slot booking API response:", slotResponse.data);
-  
-      if (slotResponse.data.success) {
-        alert("Booking successful!");
+      if (!bookingResponse.data?.patient?.id) {
+        throw new Error("Patient registration failed - no patient ID returned");
       }
+  
+      const userId = bookingResponse.data.patient.id;
+  
+      // Book the slot
+      const slotResponse = await api.post(`/slots/${slotId}/book`, {
+        user_id: userId,
+        location: formData.location
+      });
+  
+      if (!slotResponse.data?.success) {
+        throw new Error(slotResponse.data?.message || "Slot booking failed");
+      }
+  
+      // Generate QR code data
+      const qrData = {
+        bookingId: bookingResponse.data.patient.id,
+        slotId: slotResponse.data.slot.id,
+        patientName: formData.name.trim(),
+        patientNIC: formData.NIC.trim(),
+        hospital: formData.hospital.trim(),
+        department: formData.department.trim(),
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        status: 'confirmed',
+        timestamp: new Date().toISOString()
+      };
+  
+      setQrCodeData(qrData);
+      setBookingInfo({
+        patient: bookingResponse.data.patient,
+        slot: slotResponse.data.slot
+      });
+      setSuccess(true);
+  
+      // Reset form
+      setFormData({
+        name: "",
+        NIC: "",
+        number: "",
+        hospital: "",
+        department: "",
+        date: "",
+        time: "",
+        location: ""
+      });
+  
     } catch (err) {
-      console.error("Booking error:", err.response?.data || err.message);
-      alert(`Booking failed: ${err.response?.data?.error || err.message}`);
+      console.error('Booking error:', {
+        message: err.message,
+        response: err.response?.data,
+        config: err.config,
+        stack: err.stack
+      });
+  
+      let errorMessage = "Booking failed. Please try again.";
+  
+      if (err.response?.data) {
+        errorMessage = err.response.data.error ||
+                       err.response.data.message ||
+                       errorMessage;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+  
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = "Request timed out. Please check your connection.";
+      }
+  
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
   
