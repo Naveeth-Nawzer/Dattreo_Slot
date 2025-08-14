@@ -10,6 +10,8 @@ import Register from './BookingComponents/Register';
 import AdminDashboard from './Admin/admin';
 import PredefinedNotifications from './Admin/adminmessage';
 import Adminqueue from './Admin/adminqueue';
+import AdminSettings from './Admin/adminform.jsx';
+import AdminLogout from './Admin/logout.jsx';
 
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path='/adminmessage' element={<PredefinedNotifications />} />
         <Route path='/adminqueue' element={<Adminqueue />} />
+        <Route path='/adminsettings' element={<AdminSettings />} />
+        <Route path='/adminlogout' element={<AdminLogout />} />
       </Routes>
     </BrowserRouter>
   );
