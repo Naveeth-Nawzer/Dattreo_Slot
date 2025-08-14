@@ -546,113 +546,59 @@ export default function BookingAppointment() {
     return true;
   };
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-    setQrCodeData(null);
-    setBookingInfo(null);
+  e.preventDefault();
   
-    if (!validateForm()) {
-      setLoading(false);
-      return;
+  if (!validateForm()) return;
+  
+  setLoading(true);
+  setError(null);
+
+  try {
+    console.log("Submitting booking form:", formData);
+
+    // Step 1: Create patient booking
+    const bookingResponse = await api.post("/bookings", {
+      ...formData,
+      slot_id: slotId // Include slotId in the initial request
+    });
+    
+    console.log("Booking API response:", bookingResponse.data);
+
+    // Verify we got a patient ID back
+    const userId = bookingResponse.data?.patient?.id;
+    if (!userId) {
+      throw new Error("No patient ID returned from booking API");
     }
-  
-    try {
-      // Verify slot exists and is available
-      const slotCheck = await api.get(`/slots/${slotId}/status`);
-      if (!slotCheck.data?.available) {
-        throw new Error(slotCheck.data?.message || "This slot is no longer available");
-      }
-  
-      // Create patient booking (fixed endpoint)
-      const bookingResponse = await api.post("/api/bookings", {
-        name: formData.name.trim(),
-        NIC: formData.NIC.trim(),
-        number: formData.number.trim(),
-        hospital: formData.hospital.trim(),
-        department: formData.department.trim(),
-        location: formData.location
-      });
-  
-      if (!bookingResponse.data?.patient?.id) {
-        throw new Error("Patient registration failed - no patient ID returned");
-      }
-  
-      const userId = bookingResponse.data.patient.id;
-  
-      // Book the slot
-      const slotResponse = await api.post(`/slots/${slotId}/book`, {
-        user_id: userId,
-        location: formData.location
-      });
-  
-      if (!slotResponse.data?.success) {
-        throw new Error(slotResponse.data?.message || "Slot booking failed");
-      }
-  
-      // Generate QR code data
-      const qrData = {
-        bookingId: bookingResponse.data.patient.id,
-        slotId: slotResponse.data.slot.id,
-        patientName: formData.name.trim(),
-        patientNIC: formData.NIC.trim(),
-        hospital: formData.hospital.trim(),
-        department: formData.department.trim(),
-        date: formData.date,
-        time: formData.time,
-        location: formData.location,
-        status: 'confirmed',
-        timestamp: new Date().toISOString()
-      };
-  
-      setQrCodeData(qrData);
+
+    // Step 2: Book slot with the obtained patient ID
+    const slotResponse = await api.post(`/slots/${slotId}/book`, {
+      user_id: userId,
+      location: formData.location,
+    });
+
+    console.log("Slot booking API response:", slotResponse.data);
+
+    if (slotResponse.data.success) {
+      setSuccess(true);
       setBookingInfo({
         patient: bookingResponse.data.patient,
         slot: slotResponse.data.slot
       });
-      setSuccess(true);
-  
-      // Reset form
-      setFormData({
-        name: "",
-        NIC: "",
-        number: "",
-        hospital: "",
-        department: "",
-        date: "",
-        time: "",
-        location: ""
+      setQrCodeData({
+        bookingId: userId,
+        slotId: slotId
       });
-  
-    } catch (err) {
-      console.error('Booking error:', {
-        message: err.message,
-        response: err.response?.data,
-        config: err.config,
-        stack: err.stack
-      });
-  
-      let errorMessage = "Booking failed. Please try again.";
-  
-      if (err.response?.data) {
-        errorMessage = err.response.data.error ||
-                       err.response.data.message ||
-                       errorMessage;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-  
-      if (err.code === 'ECONNABORTED') {
-        errorMessage = "Request timed out. Please check your connection.";
-      }
-  
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
     }
-  };
-  
+  } catch (err) {
+    console.error("Booking error:", err);
+    setError(err.response?.data?.error || 
+            err.response?.data?.message || 
+            err.message || 
+            "Booking failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
