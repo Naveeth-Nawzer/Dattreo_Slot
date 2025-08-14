@@ -19,5 +19,6 @@ router.post('/', BookingController.createBooking);
 // Optional: nested route for slot booking under /api/bookings
 // Frontend primarily uses /api/slots/:slotId/book via SlotsRoutes
 router.post('/slots/:slotId/book', BookingController.bookSlot);
-
+router.get('/appointments/:patientId', BookingController.getPatientAppointments);
+router.get('/patients', BookingController.getAllPatientAppointments);
 module.exports = router;

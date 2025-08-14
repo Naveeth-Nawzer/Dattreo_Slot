@@ -365,3 +365,242 @@ exports.bookSlot = async (req, res) => {
     client.release(); // Release client back to pool
   }
 };
+
+/**
+ * Get appointments for a patient
+ */
+exports.getPatientAppointments = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    // Validate input
+    if (!patientId) {
+      return res.status(400).json({
+        error: "Patient ID is required",
+      });
+    }
+
+    // Query to get appointments with slot details
+    const result = await pool.query(
+      `SELECT 
+        p.name, 
+        p.nic, 
+        p.number AS mobile,
+        p.hospital,
+        p.department,
+        s.date_time,
+        s.location,
+        s.qr_code_path,
+        s.status
+      FROM slots s
+      JOIN patients p ON s.user_id = p.id
+      WHERE p._id = $1
+      ORDER BY s.date_time DESC`,
+      [patientId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No appointments found for this patient",
+      });
+    }
+
+    // Format the data for frontend
+    const appointments = result.rows.map(row => ({
+      name: row.name,
+      nic: row.nic,
+      mobile: row.mobile,
+      hospital: row.hospital,
+      department: row.department,
+      date: new Date(row.date_time).toLocaleDateString('en-GB'), // DD-MM-YYYY format
+      time: formatTimeSlot(row.date_time), // You'll need to implement this
+      location: row.location,
+      status: row.status,
+      qrCodeUrl: row.qr_code_path
+    }));
+
+    res.status(200).json({
+      success: true,
+      appointments
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      error: "Server error",
+      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
+
+// Helper function to format time slot
+function formatTimeSlot(dateTime) {
+  const date = new Date(dateTime);
+  const startTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  
+  // Assuming 15-minute slots
+  const endTime = new Date(date.getTime() + 15 * 60000).toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: false 
+  });
+  
+  return `${startTime} - ${endTime}`;
+}
+
+/**
+ * Get all patients
+ */
+exports.getAllPatients = async (req, res) => {
+  try {
+    // Query to get all patients with optional pagination
+    const { page = 1, limit = 20, search } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = `
+      SELECT 
+        id,
+        name,
+        nic,
+        number AS mobile,
+        hospital,
+        department,
+        location,
+        booking_status,
+        created_at
+      FROM patients
+    `;
+
+    let queryParams = [];
+    let whereClauses = [];
+
+    // Add search filter if provided
+    if (search) {
+      whereClauses.push(`
+        (name ILIKE $${queryParams.length + 1} OR 
+        nic ILIKE $${queryParams.length + 1} OR 
+        number ILIKE $${queryParams.length + 1})
+      `);
+      queryParams.push(`%${search}%`);
+    }
+
+    // Add WHERE clause if needed
+    if (whereClauses.length > 0) {
+      query += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    // Add sorting and pagination
+    query += `
+      ORDER BY created_at DESC
+      LIMIT $${queryParams.length + 1}
+      OFFSET $${queryParams.length + 2}
+    `;
+    queryParams.push(limit, offset);
+
+    // Execute query
+    const result = await pool.query(query, queryParams);
+
+    // Get total count for pagination
+    let countQuery = 'SELECT COUNT(*) FROM patients';
+    if (whereClauses.length > 0) {
+      countQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+    const countResult = await pool.query(countQuery, queryParams.slice(0, -2));
+    const total = parseInt(countResult.rows[0].count, 10);
+
+    // Format response
+    const patients = result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      nic: row.nic,
+      mobile: row.mobile,
+      hospital: row.hospital,
+      department: row.department,
+      location: row.location,
+      status: row.booking_status,
+      createdAt: row.created_at,
+      formattedDate: new Date(row.created_at).toLocaleDateString('en-GB')
+    }));
+
+    res.status(200).json({
+      success: true,
+      patients,
+      pagination: {
+        total,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (err) {
+    console.error('Error fetching patients:', err.message);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch patients",
+      details: process.env.NODE_ENV === "development" ? err.message : undefined
+    });
+  }
+};
+/**
+ * Get all patient appointments
+ */
+exports.getAllPatientAppointments = async (req, res) => {
+  try {
+    // Query to get all appointments with patient and slot details
+    const result = await pool.query(
+      `SELECT 
+        p.id AS patient_id,
+        p.name, 
+        p.nic, 
+        p.number AS mobile,
+        p.hospital,
+        p.department,
+        s.booked_at AS date_time,
+        s.location,
+        s.qr_code_path,
+        s.status
+      FROM slots s
+      JOIN patients p ON s.user_id = p.id
+      WHERE s.status = 'booked'
+      ORDER BY date_time DESC`
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(200).json({
+        success: true,
+        appointments: [],
+        message: "No appointments found"
+      });
+    }
+
+    // Format the data for frontend
+    const appointments = result.rows.map(row => ({
+      patientId: row.patient_id,
+      name: row.name,
+      nic: row.nic,
+      mobile: row.mobile,
+      hospital: row.hospital,
+      department: row.department,
+      date: new Date(row.date_time).toLocaleDateString('en-GB'), // DD-MM-YYYY format
+      time: formatTimeSlot(row.date_time),
+      location: row.location,
+      status: row.status,
+      qrCodeUrl: row.qr_code_path
+    }));
+
+    res.status(200).json({
+      success: true,
+      appointments
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      error: "Server error",
+      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
