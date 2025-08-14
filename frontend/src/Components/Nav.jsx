@@ -39,7 +39,7 @@ const Nav = () => {
             <select 
               value={i18n.language}
               onChange={(e) => changeLanguage(e.target.value)}
-              className="bg-transparent outline-none ml-3">
+              className="bg-teal-300 bg-clip-text outline-none ml-3">
               <option value="en">English</option>
             <option value="ta">தமிழ்</option>
             <option value="si">සිංහල</option>

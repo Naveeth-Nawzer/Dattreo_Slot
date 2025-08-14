@@ -12,7 +12,12 @@ const express = require('express');
 const router = express.Router();
 const BookingController = require('../Controllers/BookingController');
 
-router.post('/createBooking', BookingController.createBooking);
-router.post('/slots/:slotId/book', BookingController.bookSlot); // Add this route
+// Mounted at /api/bookings
+// Create a booking (patient)
+router.post('/', BookingController.createBooking);
+
+// Optional: nested route for slot booking under /api/bookings
+// Frontend primarily uses /api/slots/:slotId/book via SlotsRoutes
+router.post('/slots/:slotId/book', BookingController.bookSlot);
 
 module.exports = router;

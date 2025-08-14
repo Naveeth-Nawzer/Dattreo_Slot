@@ -1,30 +1,31 @@
 // const express = require('express');
 // const router = express.Router();
-// const slotsController = require('../controllers/slotsController');
+// const bookingController = require('../Controllers/BookingController');
 
-// // GET current config
-// router.get('/config', slotsController.getConfig);
-
-// // UPDATE config - changed from POST to PUT
-// router.put('/config', slotsController.updateConfig);
+// router.get('/slots/config', bookingController.getConfig);
+// router.get('/slots/:slotId/status', bookingController.getSlotStatus);
+// router.post('/bookings', bookingController.createBooking);
+// router.post('/slots/:slotId/book', bookingController.bookSlot);
 
 // module.exports = router;
 
 
 const express = require('express');
 const router = express.Router();
-const slotsController = require('../controllers/slotsController');
+const slotsController = require('../Controllers/SlotsController');
 
-// GET all slots
+router.route('/config')
+  .get(slotsController.getConfig)
+  .put(slotsController.updateConfig);
+
+// Slot Management Routes (mounted at /api/slots)
+// List all slots -> GET /api/slots
 router.get('/', slotsController.getAllSlots);
+// Book a slot -> POST /api/slots/:slotId/book
+router.post('/:slotId/book', slotsController.bookSlot);
+// Cancel booking -> POST /api/slots/:slotId/cancel
+router.post('/:slotId/cancel', slotsController.cancelBooking);
 
-// GET current config
-router.get('/config', slotsController.getConfig);
-
-// UPDATE config
-router.put('/config', slotsController.updateConfig);
-
-// BOOK a slot
-router.post('/:id/book', slotsController.bookSlot);
+// Note: booking/patient routes are handled under /api/bookings
 
 module.exports = router;
