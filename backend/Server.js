@@ -33,6 +33,7 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5001; // Use environment variable with fallback
 const path = require('path');
+const UserOperation = require('./Controllers/UserOperation');
 
 // Routes
 const slotRoutes = require("./routes/SlotsRoutes");
@@ -62,6 +63,7 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use("/api/slots", slotRoutes);
 app.use('/api/bookings', bookingRoutes); // More specific than just '/api'
+app.use('/UserOperation', UserOperation);
 
 // 404 Handler
 app.use((req, res, next) => {
