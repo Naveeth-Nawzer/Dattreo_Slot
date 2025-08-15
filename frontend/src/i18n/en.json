@@ -1,0 +1,38 @@
+{
+  "home": {
+    "welcome": "Welcome back,",
+    "name": "Henry!",
+    "subtitle": "Let's make your hospital visit faster and smarter",
+    "bookAppointments": "Book\nAppointments",
+    "myAppointment": "My\nAppointment",
+    "trackQueue": "Track\nQueue",
+    "qrCode": "QR\nCode"
+  },
+  "queue": {
+    "yourPosition": "Your position",
+    "notInQueue": "Not in queue",
+    "currentlyServing": "Currently serving",
+    "none": "None",
+    "estimatedWait": "Estimated wait time",
+    "queuePositions": "Queue Positions",
+    "position": "Position",
+    "bookedByOthers": "Booked by others",
+    "available": "Available"
+  },
+  "waitTime": {
+    "unknown": "Unknown",
+    "now": "Now",
+    "min": "min"
+  },
+  "common": {
+    "loading": "Loading queue data...",
+    "error": {
+      "title": "Error loading queue",
+      "retry": "Retry"
+    },
+    "apiError": {
+      "title": "API Error",
+      "loadQueueFailed": "Failed to load queue data"
+    }
+  }
+}
