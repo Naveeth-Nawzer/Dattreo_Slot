@@ -8,6 +8,7 @@ import MyAppointment from './BookingComponents/MyAppointment'
 import Finder from './Admin/Finder'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import SlotConfig from './Admin/SlotConfig';
+import AttendanceScanner from './Admin/AttendanceScanner'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -20,6 +21,7 @@ function App() {
     <Route path='/MyAppointment' element={<MyAppointment />} />
     <Route path='/Finder' element={<Finder />} />
     <Route path='/SlotConfig' element={<SlotConfig />} />
+    <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
     
     
     </Routes> </BrowserRouter>

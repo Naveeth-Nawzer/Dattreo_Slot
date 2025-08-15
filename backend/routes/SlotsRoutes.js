@@ -10,22 +10,46 @@
 // module.exports = router;
 
 
+// const express = require('express');
+// const router = express.Router();
+// const slotsController = require('../Controllers/SlotsController');
+
+// router.route('/config')
+//   .get(slotsController.getConfig)
+//   .put(slotsController.updateConfig);
+
+// // Slot Management Routes (mounted at /api/slots)
+// // List all slots -> GET /api/slots
+// router.get('/', slotsController.getAllSlots);
+// // Book a slot -> POST /api/slots/:slotId/book
+// router.post('/:slotId/book', slotsController.bookSlot);
+// // Cancel booking -> POST /api/slots/:slotId/cancel
+// router.post('/:slotId/cancel', slotsController.cancelBooking);
+
+// router.post('/scan-attendance', slotsController.scanAttendance);
+// router.get('/status', slotsController.updateAttendanceStatus);
+
+
+// module.exports = router;
+
+
+
 const express = require('express');
 const router = express.Router();
 const slotsController = require('../Controllers/SlotsController');
 
+// Configuration routes
 router.route('/config')
   .get(slotsController.getConfig)
   .put(slotsController.updateConfig);
 
-// Slot Management Routes (mounted at /api/slots)
-// List all slots -> GET /api/slots
+// Slot Management
 router.get('/', slotsController.getAllSlots);
-// Book a slot -> POST /api/slots/:slotId/book
 router.post('/:slotId/book', slotsController.bookSlot);
-// Cancel booking -> POST /api/slots/:slotId/cancel
 router.post('/:slotId/cancel', slotsController.cancelBooking);
 
-// Note: booking/patient routes are handled under /api/bookings
+// Attendance
+router.post('/scan-attendance', slotsController.scanAttendance);
+router.get('/status', slotsController.getQueueStatus);
 
 module.exports = router;

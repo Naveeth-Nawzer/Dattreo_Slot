@@ -193,34 +193,15 @@ const QRCode = require("qrcode");
 const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const logger = require('../utils/logger');
+const { InvalidQRCodeError, SlotNotFoundError } = require('../errors');
+const { Pool } = require('pg');
 
 // Ensure qrcodes directory exists
 const qrCodeDir = path.join(__dirname, "../public/qrcodes");
 if (!fs.existsSync(qrCodeDir)) {
   fs.mkdirSync(qrCodeDir, { recursive: true });
 }
-
-// Helper: reset slots when config changes
-// async function resetSlots(maxSlots) {
-//   const client = await pool.connect();
-//   try {
-//     await client.query('BEGIN');
-    
-//     await client.query(`DELETE FROM slots`);
-//     await client.query(
-//       `INSERT INTO slots (slot_number, status)
-//        SELECT generate_series(1, $1), 'available'`,
-//       [maxSlots]
-//     );
-    
-//     await client.query('COMMIT');
-//   } catch (err) {
-//     await client.query('ROLLBACK');
-//     throw err;
-//   } finally {
-//     client.release();
-//   }
-// }
 
 
 
@@ -721,3 +702,444 @@ exports.cancelBooking = async (req, res) => {
     client.release();
   }
 };
+
+
+
+
+
+
+
+
+// // exports.scanAttendance = async (req, res) => {
+// //   const { qrData } = req.body;
+  
+// //   if (!qrData) {
+// //     return res.status(400).json({ 
+// //       success: false, 
+// //       error: "QR data is required" 
+// //     });
+// //   }
+
+// //   const client = await pool.connect();
+// //   try {
+// //     await client.query('BEGIN');
+
+// //     // Parse and validate QR data
+// //     const { slotId, patientId } = parseQRData(qrData);
+
+// //     // Verify slot booking
+// //     const slot = await verifySlotBooking(client, slotId, patientId);
+
+// //     // Update attendance
+// //     const updatedSlot = await updateAttendanceStatus(client, slotId);
+
+// //     // Get patient details
+// //     const patient = await getPatientDetails(client, patientId);
+
+// //     await client.query('COMMIT');
+
+// //     // Broadcast real-time update
+// //     broadcastAttendanceUpdate(slotId, patient.rows[0]);
+
+// //     sendSuccessResponse(res, {
+// //       slot: updatedSlot.rows[0],
+// //       patient: patient.rows[0]
+// //     });
+
+// //   } catch (err) {
+// //     await client.query('ROLLBACK');
+// //     handleErrorResponse(res, err);
+// //   } finally {
+// //     client.release();
+// //   }
+// // };
+
+// // Helper functions
+// function parseQRData(qrData) {
+//   try {
+//     const parsedData = JSON.parse(qrData);
+    
+//     if (!parsedData.slotId || !parsedData.patientId) {
+//       throw new InvalidQRCodeError('QR data missing required fields');
+//     }
+    
+//     // Additional validation
+//     if (isNaN(Number(parsedData.slotId))) {
+//       throw new InvalidQRCodeError('Invalid slot ID format');
+//     }
+    
+//     if (isNaN(Number(parsedData.patientId))) {
+//       throw new InvalidQRCodeError('Invalid patient ID format');
+//     }
+    
+//     return {
+//       slotId: Number(parsedData.slotId),
+//       patientId: Number(parsedData.patientId)
+//     };
+//   } catch (err) {
+//     if (err instanceof InvalidQRCodeError) {
+//       throw err;
+//     }
+//     throw new InvalidQRCodeError('Invalid QR code format');
+//   }
+// }
+
+// async function verifySlotBooking(client, slotId, patientId) {
+//   const result = await client.query(
+//     `SELECT * FROM slots 
+//      WHERE id = $1 AND user_id = $2 AND status = 'booked'
+//      FOR UPDATE`,
+//     [slotId, patientId]
+//   );
+
+//   if (result.rows.length === 0) {
+//     throw new SlotNotFoundError('No valid booking found for this patient');
+//   }
+  
+//   // Check if already attended
+//   if (result.rows[0].status === 'present') {
+//     throw new InvalidQRCodeError('This booking has already been marked as present');
+//   }
+  
+//   return result;
+// }
+
+// async function updateAttendanceStatus(client, slotId) {
+//   return await client.query(
+//     `UPDATE slots 
+//      SET status = 'present',
+//          attended_at = NOW()
+//      WHERE id = $1
+//      RETURNING *`,
+//     [slotId]
+//   );
+// }
+
+// async function getPatientDetails(client, patientId) {
+//   return await client.query(
+//     `SELECT id, name, email FROM patients WHERE id = $1`,
+//     [patientId]
+//   );
+// }
+
+// function broadcastAttendanceUpdate(slotId, patient) {
+//   if (io) {
+//     io.emit('attendance-update', {
+//       slotId,
+//       status: 'present',
+//       patient,
+//       timestamp: new Date()
+//     });
+//   }
+// }
+
+// function sendSuccessResponse(res, data) {
+//   res.json({ 
+//     success: true,
+//     data
+//   });
+// }
+
+// function handleErrorResponse(res, err) {
+//   console.error('Attendance scan error:', {
+//     error: err.message,
+//     stack: err.stack
+//   });
+
+//   const status = err.status || 400;
+//   const response = {
+//     success: false,
+//     error: err.message,
+//     name: err.name
+//   };
+
+//   if (process.env.NODE_ENV === 'development') {
+//     response.details = err.stack;
+//   }
+
+//   res.status(status).json(response);
+// }
+
+
+// exports.getQueueStatus = async (req, res) => {
+//   try {
+//     // Replace with real queue status logic
+//     const status = {
+//       userPosition: null,
+//       currentServing: null,
+//       totalSpots: 0,
+//       slots: []
+//     };
+//     res.json(status);
+//   } catch (err) {
+//     console.error("Error fetching queue status:", err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+
+// // In your slotsController.js
+// exports.scanAttendance = async (req, res) => {
+//   const { qrData } = req.body;
+  
+//   if (!qrData) {
+//     return res.status(400).json({ 
+//       success: false, 
+//       error: "QR data is required" 
+//     });
+//   }
+
+//   const client = await pool.connect();
+//   try {
+//     await client.query('BEGIN');
+
+//     // Parse and validate QR data
+//     const { slotId, patientId } = parseQRData(qrData);
+
+//     // Verify slot booking
+//     const slot = await verifySlotBooking(client, slotId, patientId);
+
+//     // Update attendance - MAKE SURE THIS IS WORKING
+//     const updatedSlot = await updateAttendanceStatus(client, slotId);
+//     console.log("Updated slot:", updatedSlot.rows[0]); // Add logging
+
+//     // Get patient details
+//     const patient = await getPatientDetails(client, patientId);
+
+//     await client.query('COMMIT');
+
+//     // Broadcast real-time update
+//     broadcastAttendanceUpdate(slotId, patient.rows[0]);
+
+//     sendSuccessResponse(res, {
+//       slot: updatedSlot.rows[0],
+//       patient: patient.rows[0]
+//     });
+
+//   } catch (err) {
+//     await client.query('ROLLBACK');
+//     console.error("Error in scanAttendance:", err); // Add error logging
+//     handleErrorResponse(res, err);
+//   } finally {
+//     client.release();
+//   }
+// };
+
+
+
+
+
+
+
+
+
+
+
+exports.getQueueStatus = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const slots = await client.query('SELECT * FROM slots ORDER BY slot_number');
+    const serving = await client.query(`SELECT MIN(slot_number) FROM slots WHERE status = 'serving'`);
+    
+    res.json({
+      userPosition: null, // Implement your logic
+      currentServing: serving.rows[0].min || null,
+      totalSpots: slots.rows.length,
+      slots: slots.rows
+    });
+  } catch (err) {
+    console.error("Queue status error:", err);
+    res.status(500).json({ error: "Failed to get queue status" });
+  } finally {
+    client.release();
+  }
+};
+
+exports.scanAttendance = async (req, res) => {
+  try {
+    console.log('Raw request body:', req.body); // Debug log
+
+    if (!req.body) {
+      return res.status(400).json({ error: 'Request body is missing' });
+    }
+
+    const { qrData } = req.body;
+    if (!qrData) {
+      return res.status(400).json({ error: 'QR data is required' });
+    }
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(qrData);
+      console.log('Parsed QR data:', parsedData); // Debug log
+    } catch (e) {
+      return res.status(400).json({ 
+        error: 'Invalid QR data format',
+        receivedData: qrData
+      });
+    }
+
+    // Accept both camelCase and lowercase field names
+    const slotId = parsedData.slotId || parsedData.slotid;
+    const patientId = parsedData.patientId || parsedData.patientid;
+
+    if (!slotId || !patientId) {
+      return res.status(400).json({ 
+        error: 'slotId and patientId are required',
+        receivedData: parsedData
+      });
+    }
+
+    // Update the slot status in PostgreSQL
+    const query = `
+    UPDATE slots
+    SET status = $1, 
+        patient_id = $2, 
+        scanned_at = $3
+    WHERE id = $4
+    RETURNING *`;
+  
+  const values = [
+    'present',
+    patientId,
+    new Date(),
+    slotId
+  ];
+  
+
+    console.log('Executing DB query:', query, values); // Debug log
+    
+    const { rows } = await pool.query(query, values);
+    const updatedSlot = rows[0];
+
+    if (!updatedSlot) {
+      return res.status(404).json({ error: 'Slot not found' });
+    }
+
+    res.json({ 
+      success: true,
+      message: 'Attendance recorded successfully',
+      slot: updatedSlot
+    });
+
+  } catch (error) {
+    console.error('Full error:', error); // More detailed error logging
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message,
+      ...(process.env.NODE_ENV === 'development' && {
+        stack: error.stack,
+        fullError: error
+      })
+    });
+  }
+};
+
+
+function parseQRData(qrData) {
+  try {
+    const parsedData = JSON.parse(qrData);
+    
+    if (!parsedData.slotId || !parsedData.patientId) {
+      throw new InvalidQRCodeError('QR data missing required fields');
+    }
+    
+    if (isNaN(Number(parsedData.slotId))) {
+      throw new InvalidQRCodeError('Invalid slot ID format');
+    }
+    
+    if (isNaN(Number(parsedData.patientId))) {
+      throw new InvalidQRCodeError('Invalid patient ID format');
+    }
+    
+    return {
+      slotId: Number(parsedData.slotId),
+      patientId: Number(parsedData.patientId)
+    };
+  } catch (err) {
+    if (err instanceof InvalidQRCodeError) {
+      throw err;
+    }
+    throw new InvalidQRCodeError('Invalid QR code format');
+  }
+}
+
+async function verifySlotBooking(client, slotId, patientId) {
+  const result = await client.query(
+    `SELECT * FROM slots 
+     WHERE id = $1 AND user_id = $2 AND status = 'booked'
+     FOR UPDATE`,
+    [slotId, patientId]
+  );
+
+  if (result.rows.length === 0) {
+    throw new SlotNotFoundError('No valid booking found for this patient');
+  }
+  
+  if (result.rows[0].status === 'present') {
+    throw new InvalidQRCodeError('This booking has already been marked as present');
+  }
+  
+  return result;
+}
+
+async function updateAttendanceStatus(client, slotId) {
+  return await client.query(
+    `UPDATE slots 
+     SET status = 'present',
+         attended_at = NOW()
+     WHERE id = $1
+     RETURNING *`,
+    [slotId]
+  );
+}
+
+async function getPatientDetails(client, patientId) {
+  return await client.query(
+    `SELECT id, name, email FROM patients WHERE id = $1`,
+    [patientId]
+  );
+}
+
+function broadcastAttendanceUpdate(slotId, patient) {
+  if (io) {
+    io.emit('attendance-update', {
+      slotId,
+      status: 'present',
+      patient,
+      timestamp: new Date()
+    });
+  }
+}
+
+function sendSuccessResponse(res, data) {
+  res.json({ 
+    success: true,
+    data
+  });
+}
+
+function handleErrorResponse(res, err) {
+  console.error('Attendance scan error:', {
+    error: err.message,
+    stack: err.stack
+  });
+
+  const status = err.status || 400;
+  const response = {
+    success: false,
+    error: err.message,
+    name: err.name
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    response.details = err.stack;
+  }
+
+  res.status(status).json(response);
+}
+
+
+
+
+
+

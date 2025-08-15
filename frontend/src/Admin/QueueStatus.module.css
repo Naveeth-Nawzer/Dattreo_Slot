@@ -1,0 +1,251 @@
+.queue-status-container {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+}
+
+.queue-status-container main {
+  flex: 1;
+  padding: 2.5rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .queue-status-container main {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.queue-status-container .max-w-5xl {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.queue-status-container .bg-white {
+  background-color: white;
+}
+
+.queue-status-container .rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.queue-status-container .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.queue-status-container .p-6 {
+  padding: 1.5rem;
+}
+
+.queue-status-container .mb-10 {
+  margin-bottom: 2.5rem;
+}
+
+.queue-status-container .flex {
+  display: flex;
+}
+
+.queue-status-container .flex-col {
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .queue-status-container .sm\:flex-row {
+    flex-direction: row;
+  }
+}
+
+.queue-status-container .justify-between {
+  justify-content: space-between;
+}
+
+.queue-status-container .items-start {
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .queue-status-container .sm\:items-center {
+    align-items: center;
+  }
+}
+
+.queue-status-container .gap-6 {
+  gap: 1.5rem;
+}
+
+.queue-status-container .text-gray-500 {
+  color: #6b7280;
+}
+
+.queue-status-container .text-sm {
+  font-size: 0.875rem;
+}
+
+.queue-status-container .uppercase {
+  text-transform: uppercase;
+}
+
+.queue-status-container .tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+.queue-status-container .text-3xl {
+  font-size: 1.875rem;
+}
+
+.queue-status-container .font-bold {
+  font-weight: 700;
+}
+
+.queue-status-container .text-gray-800 {
+  color: #1f2937;
+}
+
+.queue-status-container .text-gray-400 {
+  color: #9ca3af;
+}
+
+.queue-status-container .text-lg {
+  font-size: 1.125rem;
+}
+
+.queue-status-container .text-teal-600 {
+  color: #0d9488;
+}
+
+.queue-status-container .text-xl {
+  font-size: 1.25rem;
+}
+
+.queue-status-container .font-semibold {
+  font-weight: 600;
+}
+
+.queue-status-container .mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.queue-status-container .grid {
+  display: grid;
+}
+
+.queue-status-container .grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .queue-status-container .sm\:grid-cols-10 {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+
+.queue-status-container .gap-4 {
+  gap: 1rem;
+}
+
+.queue-status-container .bg-gray-200 {
+  background-color: #e5e7eb;
+}
+
+.queue-status-container .text-gray-500 {
+  color: #6b7280;
+}
+
+.queue-status-container .bg-yellow-100 {
+  background-color: #fef9c3;
+}
+
+.queue-status-container .border-2 {
+  border-width: 2px;
+}
+
+.queue-status-container .border-yellow-400 {
+  border-color: #facc15;
+}
+
+.queue-status-container .text-yellow-600 {
+  color: #ca8a04;
+}
+
+.queue-status-container .bg-teal-100 {
+  background-color: #ccfbf1;
+}
+
+.queue-status-container .border-teal-400 {
+  border-color: #2dd4bf;
+}
+
+.queue-status-container .text-teal-600 {
+  color: #0d9488;
+}
+
+.queue-status-container .bg-red-100 {
+  background-color: #fee2e2;
+}
+
+.queue-status-container .text-red-600 {
+  color: #dc2626;
+}
+
+.queue-status-container .w-12 {
+  width: 3rem;
+}
+
+.queue-status-container .h-12 {
+  height: 3rem;
+}
+
+.queue-status-container .rounded-full {
+  border-radius: 9999px;
+}
+
+.queue-status-container .flex {
+  display: flex;
+}
+
+.queue-status-container .items-center {
+  align-items: center;
+}
+
+.queue-status-container .justify-center {
+  justify-content: center;
+}
+
+.queue-status-container .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.queue-status-container .mt-8 {
+  margin-top: 2rem;
+}
+
+.queue-status-container .flex-wrap {
+  flex-wrap: wrap;
+}
+
+.queue-status-container .select-none {
+  user-select: none;
+}
+
+.queue-status-container .w-4 {
+  width: 1rem;
+}
+
+.queue-status-container .h-4 {
+  height: 1rem;
+}
+
+.queue-status-container .border-red-300 {
+  border-color: #fca5a5;
+}
+
+.queue-status-container .mr-2 {
+  margin-right: 0.5rem;
+}
+
+.queue-status-container .text-gray-600 {
+  color: #4b5563;
+}
