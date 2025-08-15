@@ -331,6 +331,49 @@ exports.getConfig = async (req, res) => {
   }
 };
 
+// controllers/slotsController.js
+
+exports.createConfig = async (req, res) => {
+  try {
+    const { max_slots, location } = req.body;
+
+    // Validation
+    if (
+      typeof max_slots !== 'number' || max_slots < 1 || max_slots > 1000 ||
+      !location || location.trim() === ''
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid max_slots (1-1000) or location'
+      });
+    }
+
+    // Insert new config into slot_config table
+    const result = await pool.query(
+      `INSERT INTO slot_config (max_slots, location)
+       VALUES ($1, $2)
+       RETURNING config_id, max_slots, location`,
+      [max_slots, location]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'New configuration created successfully',
+      config: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error('Error creating config:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create configuration',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
+
+
+
 // exports.updateConfig = async (req, res) => {
 //   const { max_slots, location } = req.body;
 

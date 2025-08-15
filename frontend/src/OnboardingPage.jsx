@@ -1,9 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TealWaveBackground from "./Components/TealWaveBackground";
-import logo from "./assets/logo.png"
-import BrushTealWaves from './Components/BrushTealWaves'
+import BrushTealWaves from './Components/BrushTealWaves';
+import logo from "./assets/logo.png";
 
 const OnboardingPage = () => {
+  const navigate = useNavigate();
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    // Start fade-out after 1.5 seconds
+    const fadeTimer = setTimeout(() => {
+      setFadeOut(true);
+    }, 1500);
+
+    // Navigate to home after fade-out completes (total 2s)
+    const navTimer = setTimeout(() => {
+      navigate('/LanguageSelection');
+    }, 3000);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(navTimer);
+    };
+  }, [navigate]);
+
   return (
     <div className="fixed w-full h-screen">
       {/* Static background */}
@@ -12,8 +33,9 @@ const OnboardingPage = () => {
         <BrushTealWaves />
       </div>
 
-      {/* Centered logo */}
-      <div className="flex items-center justify-center w-full h-full relative z-10">
+      {/* Centered logo with fade-in and fade-out */}
+      <div className={`flex items-center justify-center w-full h-full relative z-10
+                        ${fadeOut ? 'animate-fadeOut' : 'animate-fadeIn'}`}>
         <img
           src={logo}
           alt="logo"
@@ -21,7 +43,7 @@ const OnboardingPage = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OnboardingPage
+export default OnboardingPage;

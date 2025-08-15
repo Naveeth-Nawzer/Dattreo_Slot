@@ -27,7 +27,7 @@ function App() {
     <I18nextProvider i18n={i18n}>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<TrackQueue />} />
+          <Route path='/queue' element={<TrackQueue />} />
           <Route path='/admin' element={<Dashboard />} />  
           <Route path='/adminnotifications' element={<AdminNotifications />} />  
           <Route path='/signup' element={<Signup />} />
@@ -41,7 +41,7 @@ function App() {
           <Route path='/Register' element={<Register/>} />
           <Route path='/SignIn' element={<SignIn />}/>
           <Route path='/home' element={<Home />} />
-          <Route path='/OnboardingPage' element={<OnboardingPage />} />
+          <Route path='/' element={<OnboardingPage />} />
           <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
         </Routes>
       </BrowserRouter>

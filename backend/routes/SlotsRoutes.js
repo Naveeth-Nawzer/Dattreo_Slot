@@ -16,7 +16,8 @@ const slotsController = require('../Controllers/SlotsController');
 
 router.route('/config')
   .get(slotsController.getConfig)
-  .put(slotsController.updateConfig);
+  .put(slotsController.updateConfig)
+  .post(slotsController.createConfig);
 
 // Slot Management Routes (mounted at /api/slots)
 // List all slots -> GET /api/slots
