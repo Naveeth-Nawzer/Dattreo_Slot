@@ -122,61 +122,142 @@ const BookingAppointment = () => {
     return true;
   }, [formData, slotId]);
 
+  // const handleSubmit = useCallback(async (e) => {
+  //   e.preventDefault();
+    
+  //   // Validate form before submission
+  //   if (!validateForm()) {
+  //     return;
+  //   }
+    
+  //   setLoading(true);
+  //   setError(null);
+  
+  //   try {
+  //     // 1. Prepare the payload with exact field names expected by backend
+  //     const bookingPayload = {
+  //       name: formData.name.trim(),
+  //       NIC: formData.nic.trim(),  // Using uppercase NIC to match backend
+  //       number: formData.number.trim(),
+  //       hospital: formData.hospital.trim(),
+  //       department: formData.department.trim(),
+  //       location: formData.location || 'Main Office', // Default if empty
+  //       date: formData.date,
+  //       time: formData.time,
+  //       slot_id: parseInt(slotId)  // Ensure slotId is a number
+  //     };
+  
+  //     console.log('Submitting booking payload:', bookingPayload);
+  
+  //     // 2. First create the patient booking
+  //     const bookingResponse = await api.post("/bookings", bookingPayload);
+      
+  //     if (!bookingResponse.data?.patient?.id) {
+  //       throw new Error("Patient booking failed - no ID returned");
+  //     }
+  
+  //     const userId = bookingResponse.data.patient.id;
+  
+  //     // 3. Then book the slot with the patient ID
+  //     const slotResponse = await api.post(`/slots/${slotId}/book`, {
+  //       user_id: userId,
+  //       location: bookingPayload.location
+  //     });
+  
+  //     // 4. Handle successful booking
+  //     setSuccess(true);
+  //     setBookingInfo({
+  //       patient: bookingResponse.data.patient,
+  //       slot: slotResponse.data.slot
+  //     });
+      
+  //     setQrCodeData({
+  //       bookingId: userId,
+  //       slotId: slotId,
+  //       patientName: formData.name,
+  //       dateTime: `${formData.date} ${formData.time}`,
+  //       location: formData.location
+  //     });
+  
+  //   } catch (err) {
+  //     console.error("Booking error details:", {
+  //       error: err,
+  //       response: err.response?.data,
+  //       config: err.config
+  //     });
+  
+  //     let errorMessage = "Booking failed. Please try again.";
+      
+  //     if (err.response) {
+  //       // Handle backend validation errors
+  //       if (err.response.status === 400) {
+  //         errorMessage = err.response.data?.error || 
+  //                       err.response.data?.message || 
+  //                       "Invalid data submitted";
+  //       } else if (err.response.status === 409) {
+  //         errorMessage = "This slot is no longer available";
+  //       }
+  //     } else if (err.request) {
+  //       errorMessage = "No response from server. Please check your connection.";
+  //     }
+  
+  //     setError(errorMessage);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [formData, slotId, validateForm]);
+
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    
+  
     // Validate form before submission
     if (!validateForm()) {
       return;
     }
-    
+  
     setLoading(true);
     setError(null);
   
     try {
-      // 1. Prepare the payload with exact field names expected by backend
+      // 1. Prepare payload matching backend expectations
       const bookingPayload = {
         name: formData.name.trim(),
-        NIC: formData.nic.trim(),  // Using uppercase NIC to match backend
+        NIC: formData.nic.trim(),  // backend expects uppercase NIC
         number: formData.number.trim(),
         hospital: formData.hospital.trim(),
         department: formData.department.trim(),
-        location: formData.location || 'Main Office', // Default if empty
+        location: formData.location || 'Main Office',
         date: formData.date,
         time: formData.time,
-        slot_id: parseInt(slotId)  // Ensure slotId is a number
+        slot_id: parseInt(slotId, 10) // ensure number
       };
   
       console.log('Submitting booking payload:', bookingPayload);
   
-      // 2. First create the patient booking
+      // 2. Create the patient booking
       const bookingResponse = await api.post("/bookings", bookingPayload);
-      
       if (!bookingResponse.data?.patient?.id) {
         throw new Error("Patient booking failed - no ID returned");
       }
+      const patientId = bookingResponse.data.patient.id;
   
-      const userId = bookingResponse.data.patient.id;
-  
-      // 3. Then book the slot with the patient ID
+      // 3. Book the slot
       const slotResponse = await api.post(`/slots/${slotId}/book`, {
-        user_id: userId,
+        user_id: patientId,
         location: bookingPayload.location
       });
   
-      // 4. Handle successful booking
+      // 4. Handle success
       setSuccess(true);
       setBookingInfo({
         patient: bookingResponse.data.patient,
         slot: slotResponse.data.slot
       });
-      
+  
+      // ✅ 5. Generate QR code data in backend-expected format
       setQrCodeData({
-        bookingId: userId,
-        slotId: slotId,
-        patientName: formData.name,
-        dateTime: `${formData.date} ${formData.time}`,
-        location: formData.location
+        slotId: parseInt(slotId, 10),
+        patientId: parseInt(patientId, 10)
       });
   
     } catch (err) {
@@ -187,12 +268,10 @@ const BookingAppointment = () => {
       });
   
       let errorMessage = "Booking failed. Please try again.";
-      
       if (err.response) {
-        // Handle backend validation errors
         if (err.response.status === 400) {
-          errorMessage = err.response.data?.error || 
-                        err.response.data?.message || 
+          errorMessage = err.response.data?.error ||
+                        err.response.data?.message ||
                         "Invalid data submitted";
         } else if (err.response.status === 409) {
           errorMessage = "This slot is no longer available";
@@ -206,6 +285,10 @@ const BookingAppointment = () => {
       setLoading(false);
     }
   }, [formData, slotId, validateForm]);
+  
+  
+
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
       {/* Heading */}
@@ -345,12 +428,14 @@ const BookingAppointment = () => {
               className="p-4 bg-white rounded-lg border border-gray-300 mb-4"
               ref={qrCodeRef}
             >
-              <QRCodeCanvas 
-                value={JSON.stringify(qrCodeData)}
-                size={200}
-                level="H"
-                includeMargin={true}
-              />
+            <QRCodeCanvas
+  value={JSON.stringify(qrCodeData)}
+  size={200}
+  level="H"
+  includeMargin
+/>
+
+
             </div>
             
             <div className="w-full space-y-2 mb-4">
