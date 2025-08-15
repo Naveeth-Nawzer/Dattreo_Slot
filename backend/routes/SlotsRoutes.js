@@ -52,5 +52,7 @@ router.post('/:slotId/cancel', slotsController.cancelBooking);
 // Attendance
 router.post('/scan-attendance', slotsController.scanAttendance);
 router.get('/status', slotsController.getQueueStatus);
+router.get('/status', slotsController.markPatientLeft);
+router.patch('/:id/status', slotsController.updateStatus);
 
 module.exports = router;

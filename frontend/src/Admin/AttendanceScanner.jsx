@@ -372,25 +372,28 @@ export default function AttendanceScanner() {
         {/* Queue Visualization */}
         <div className="grid grid-cols-5 sm:grid-cols-10 gap-4 mb-8">
         {queueStatus.slots.map((slot) => {
-  let slotClasses = "w-12 h-12 rounded-full flex flex-col items-center justify-center shadow-sm ";
-  let statusClasses = "text-xs mt-1 ";
+        let slotClasses = "w-12 h-12 rounded-full flex flex-col items-center justify-center shadow-sm ";
+        let statusClasses = "text-xs mt-1 ";
   
-  if (scanResult?.patientId && slot.user_id === scanResult.patientId) {
-    slotClasses += "bg-purple-100 border-2 border-purple-400 ";
-    statusClasses += "text-purple-600";
-  } else if (slot.status === 'present') {
-    slotClasses += "bg-green-100 border-2 border-green-400 ";
-    statusClasses += "text-green-600";
-  } else if (slot.status === 'serving') {
-    slotClasses += "bg-teal-100 border-2 border-teal-400 ";
-    statusClasses += "text-teal-600";
-  } else if (slot.status === 'booked') {
-    slotClasses += "bg-red-100 ";
-    statusClasses += "text-red-600";
-  } else {
-    slotClasses += "bg-gray-200 ";
-    statusClasses += "text-gray-600";
-  }
+        if (scanResult?.patientId && slot.user_id === scanResult.patientId) {
+        slotClasses += "bg-purple-100 border-2 border-purple-400 ";
+        statusClasses += "text-purple-600";
+        } else if (slot.status === 'present') {
+        slotClasses += "bg-green-100 border-2 border-green-400 ";
+        statusClasses += "text-green-600";
+        } else if (slot.status === 'serving') {
+        slotClasses += "bg-teal-100 border-2 border-teal-400 ";
+        statusClasses += "text-teal-600";
+        } else if (slot.status === 'booked') {
+          slotClasses += "bg-red-100 ";
+          statusClasses += "text-red-600";
+        }else if (slot.status === 'left') {
+            slotClasses += "bg-red-100 ";
+            statusClasses += "text-red-600";
+        } else {
+       slotClasses += "bg-gray-200 ";
+       statusClasses += "text-gray-600";
+        }
 
   return (
     <div key={slot.id} className={slotClasses}>

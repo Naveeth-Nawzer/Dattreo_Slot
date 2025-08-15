@@ -124,15 +124,79 @@
 // });
 
 
+// const express = require('express');
+// const cors = require('cors');
+// const app = express();
+// const PORT = process.env.PORT || 5001;
+// const bookingRoutes = require('./routes/BookingRoutes');
+
+// app.use(cors({
+//   origin: 'http://localhost:5173', // Your frontend origin
+//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
+// // Handle preflight requests
+// app.options('*', cors());
+
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control'],
+//   optionsSuccessStatus: 200
+// };
+
+// // Middleware
+// app.use(cors(corsOptions));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+
+// // Health Check
+// app.get('/api/health', (req, res) => {
+//   res.status(200).json({ status: 'healthy' });
+// });
+
+// // Routes
+// const slotsRoutes = require('./routes/SlotsRoutes');
+// app.use('/api/slots', slotsRoutes);
+
+
+// app.use('/api/bookings', bookingRoutes); // More specific than just '/api'
+
+// // Error Handling Middleware
+// app.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).json({ 
+//     error: 'Internal Server Error',
+//     message: process.env.NODE_ENV === 'development' ? err.message : undefined
+//   });
+// });
+
+// // Start Server
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+//   console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
+// });
+
 const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5001;
-const bookingRoutes = require('./routes/BookingRoutes');
 
-// Enhanced CORS Configuration
-const allowedOrigins = ['http://localhost:5173']; // Add production URL when needed
+// Define allowed origins
+const allowedOrigins = [
+  'http://localhost:5173', // Your frontend origin
+  // Add other allowed origins here if needed
+];
 
+// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -142,7 +206,7 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control'],
   optionsSuccessStatus: 200
 };
@@ -159,6 +223,9 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 const slotsRoutes = require('./routes/SlotsRoutes');
+const bookingRoutes = require('./routes/BookingRoutes');
+const UserOperation = require('./Controllers/UserOperation');
+
 app.use('/api/slots', slotsRoutes);
 
 

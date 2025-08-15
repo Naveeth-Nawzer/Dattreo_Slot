@@ -1,4 +1,3 @@
-
 const pool = require("../db/db");
 const QRCode = require("qrcode");
 const path = require("path");
@@ -7,8 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 const logger = require('../utils/logger');
 const { InvalidQRCodeError, SlotNotFoundError } = require('../errors');
 const { Pool } = require('pg');
+const db = require('../db/db');
 
-// Ensure qrcodes directory exists
+
 const qrCodeDir = path.join(__dirname, "../public/qrcodes");
 if (!fs.existsSync(qrCodeDir)) {
   fs.mkdirSync(qrCodeDir, { recursive: true });
@@ -618,7 +618,96 @@ function handleErrorResponse(res, err) {
 }
 
 
+// Add this to your existing backend API
+exports.markPatientLeft = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { slotId } = req.body;
+    
+    if (!slotId) {
+      return res.status(400).json({ error: 'slotId is required' });
+    }
+
+    // Update the slot status to 'left'
+    const query = `
+      UPDATE slots
+      SET status = 'left',
+          left_at = NOW()
+      WHERE id = $1
+      RETURNING *`;
+    
+    const { rows } = await client.query(query, [slotId]);
+    const updatedSlot = rows[0];
+
+    if (!updatedSlot) {
+      return res.status(404).json({ error: 'Slot not found' });
+    }
+
+    // Get updated queue status
+    const queueStatus = await getQueueStatus(client);
+
+    res.json({ 
+      success: true,
+      message: 'Patient marked as left successfully',
+      slot: updatedSlot,
+      queueStatus
+    });
+
+  } catch (error) {
+    console.error('Error marking patient left:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message
+    });
+  } finally {
+    client.release();
+  }
+};
+
+// Helper function to get queue status
+async function getQueueStatus(client) {
+  const slots = await client.query('SELECT * FROM slots ORDER BY slot_number');
+  const serving = await client.query(`SELECT MIN(slot_number) FROM slots WHERE status = 'serving'`);
+  
+  return {
+    slots: slots.rows,
+    currentServing: serving.rows[0].min || null,
+    totalSpots: slots.rows.length
+  };
+}
 
 
+exports.updateStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
 
+    // Validate status
+    const validStatuses = ['waiting', 'present', 'left', 'serving', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
 
+    // Update in database
+    const result = await db.query(
+      'UPDATE slots SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Slot not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Database error:', {
+      message: error.message,
+      query: error.query,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
