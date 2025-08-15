@@ -8,10 +8,9 @@ const SlotConfig = () => {
   });
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [allConfigs, setAllConfigs] = useState([]);
 
-  // Fetch all existing configs
-   useEffect(() => {
+  // Fetch current config on component mount
+  useEffect(() => {
     const fetchConfig = async () => {
       setIsLoading(true);
       try {
@@ -36,22 +35,22 @@ const SlotConfig = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
-
+    
     // Validation
     if (!config.max_slots || config.max_slots < 1 || config.max_slots > 1000) {
       setMessage('Slots must be between 1 and 1000');
       return;
     }
-
+    
     if (!config.location || config.location.trim() === '') {
       setMessage('Location is required');
       return;
     }
-
+  
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        'http://localhost:5001/api/slots/config', // POST to create new config
+      const response = await axios.put(
+        'http://localhost:5001/api/slots/config',
         { 
           max_slots: config.max_slots,
           location: config.location
@@ -62,25 +61,37 @@ const SlotConfig = () => {
           }
         }
       );
-
+      
       if (response.data.success) {
-        setMessage('New configuration created successfully!');
-        setAllConfigs(prev => [...prev, response.data.config]);
-        // Reset form
-        setConfig({ max_slots: 20, location: 'Main Office' });
+        setMessage('Configuration updated successfully!');
+        // Optionally refresh the config
+        const newConfig = await axios.get('http://localhost:5001/api/slots/config');
+        setConfig({
+          max_slots: newConfig.data.max_slots,
+          location: newConfig.data.location
+        });
       } else {
-        setMessage(response.data.message || 'Creation failed');
+        setMessage(response.data.message || 'Update failed');
       }
     } catch (err) {
-      console.error('Create config error:', err);
-      let errorMsg = 'Failed to create configuration';
-
+      console.error('Full update error:', err);
+      let errorMsg = 'Failed to update configuration';
+      
       if (err.response) {
         errorMsg = err.response.data?.message || `Server error: ${err.response.status}`;
+        
+        if (err.response.status === 409) {
+          errorMsg = 'Configuration conflict - please refresh and try again';
+        }
+        
+        if (err.response.data?.detail) {
+          console.error('Server error details:', err.response.data.detail);
+          errorMsg += ` (${err.response.data.detail.error || 'no details'})`;
+        }
       } else if (err.request) {
         errorMsg = 'No response from server - check backend is running';
       }
-
+      
       setMessage(errorMsg);
     } finally {
       setIsLoading(false);
@@ -90,7 +101,7 @@ const SlotConfig = () => {
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Slot Configuration</h2>
-
+      
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Max Slots</label>
@@ -141,18 +152,6 @@ const SlotConfig = () => {
           {message}
         </div>
       )}
-
-      {/* Optional: Display all saved configs */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">All Configurations:</h3>
-        <ul className="list-disc pl-5">
-          {allConfigs.map((cfg, idx) => (
-            <li key={idx}>
-              Slots: {cfg.max_slots}, Location: {cfg.location}
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 };
