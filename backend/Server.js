@@ -188,6 +188,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const path = require('path');
 const PORT = process.env.PORT || 5001;
 
 // Define allowed origins
@@ -220,6 +221,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
+app.use('/qrcodes', express.static(path.join(__dirname, 'public/qrcodes')));
+
 
 // Routes
 const slotsRoutes = require('./routes/SlotsRoutes');

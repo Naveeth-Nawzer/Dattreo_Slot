@@ -44,10 +44,14 @@ router.route('/config')
   .put(slotsController.updateConfig)
   .post(slotsController.createConfig);
 
+  router.get('/departments',slotsController.getDepartments)
+  router.get('/slots/qrcode', slotsController.getQRCode);
+
 // Slot Management
 router.get('/', slotsController.getAllSlots);
 router.post('/:slotId/book', slotsController.bookSlot);
 router.post('/:slotId/cancel', slotsController.cancelBooking);
+
 
 // Attendance
 router.post('/scan-attendance', slotsController.scanAttendance);

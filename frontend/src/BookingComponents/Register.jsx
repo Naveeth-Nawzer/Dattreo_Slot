@@ -106,6 +106,12 @@ export default function FirstVisitForm() {
 
       const data = await response.json();
       console.log('Registration successful:', data);
+
+      localStorage.setItem('userData', JSON.stringify({
+        nic: formData.nic,
+        emailormobile: formData.emailormobile,
+        ...data.user // assuming the API returns additional user data
+      }));
       
       // Handle successful registration (redirect, show message, etc.)
       // Example:
@@ -114,6 +120,9 @@ export default function FirstVisitForm() {
 
     } catch (error) {
       console.error('Registration failed:', error);
+
+                localStorage.removeItem('userData');
+
       // Handle errors (show to user)
       // Example:
       // setErrorMessage(error.message || 'Registration failed. Please try again.');

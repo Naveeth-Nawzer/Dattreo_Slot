@@ -21,4 +21,5 @@ router.post('/', BookingController.createBooking);
 router.post('/slots/:slotId/book', BookingController.bookSlot);
 router.get('/appointments/:patientId', BookingController.getPatientAppointments);
 router.get('/patients', BookingController.getAllPatientAppointments);
+router.get('/patientappointment', BookingController.getPatientAppointments);
 module.exports = router;

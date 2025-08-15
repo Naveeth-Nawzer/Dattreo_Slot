@@ -9,9 +9,21 @@ export default function MyAppointment() {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await axios.get(`http://localhost:5001/api/bookings/patients`);
+        // Get user data from localStorage
+        const userData = JSON.parse(localStorage.getItem('userData'));
         
-        // Check for both response.data and response.data.appointments
+        if (!userData?.nic) {
+          setError("No user NIC found");
+          setLoading(false);
+          return;
+        }
+
+        // Send just the NIC as a query parameter
+        const response = await axios.get(
+          `http://localhost:5001/api/bookings/patientappointment`,
+          { params: { nic: userData.nic } }
+        );
+        
         if (response.data?.success) {
           setAppointments(response.data.appointments || []);
         } else {
@@ -27,6 +39,8 @@ export default function MyAppointment() {
 
     fetchAppointments();
   }, []);
+
+ 
 
   if (loading) {
     return (

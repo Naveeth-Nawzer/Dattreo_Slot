@@ -20,6 +20,7 @@ import Signup from './pages/Signup';
 import SlotConfig from './Admin/SlotConfig';
 import i18n from './i18n';
 import AttendanceScanner from './Admin/AttendanceScanner'
+import QRCodePage from './pages/QRCodePage';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -45,6 +46,7 @@ function App() {
           <Route path='/' element={<OnboardingPage />} />
           <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
           <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
+          <Route path='/qr' element={<QRCodePage />} />
         </Routes>
       </BrowserRouter>
     </I18nextProvider>

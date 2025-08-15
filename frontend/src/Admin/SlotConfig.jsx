@@ -4,10 +4,13 @@ import axios from 'axios';
 const SlotConfig = () => {
   const [config, setConfig] = useState({
     max_slots: 20,
-    location: 'Main Office' // Default location
+    location: 'Main Office',
+    department: 'General' // Default department
   });
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [departmentSuggestions, setDepartmentSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Fetch current config on component mount
   useEffect(() => {
@@ -18,9 +21,11 @@ const SlotConfig = () => {
         if (response.data.success) {
           setConfig({
             max_slots: response.data.max_slots,
-            location: response.data.location || 'Main Office' // Fallback to default
+            location: response.data.location || 'Main Office',
+            department: response.data.department || 'General'
           });
         }
+        
       } catch (err) {
         console.error('Failed to fetch config:', err);
         setMessage(err.response?.data?.message || 'Failed to load configuration');
@@ -31,6 +36,22 @@ const SlotConfig = () => {
 
     fetchConfig();
   }, []);
+
+  const handleDepartmentChange = (e) => {
+    setConfig({
+      ...config,
+      department: e.target.value
+    });
+    setShowSuggestions(true);
+  };
+
+  const selectSuggestion = (suggestion) => {
+    setConfig({
+      ...config,
+      department: suggestion
+    });
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +67,11 @@ const SlotConfig = () => {
       setMessage('Location is required');
       return;
     }
+
+    if (!config.department || config.department.trim() === '') {
+      setMessage('Department is required');
+      return;
+    }
   
     setIsLoading(true);
     try {
@@ -53,7 +79,8 @@ const SlotConfig = () => {
         'http://localhost:5001/api/slots/config',
         { 
           max_slots: config.max_slots,
-          location: config.location
+          location: config.location,
+          department: config.department
         },
         {
           headers: {
@@ -68,7 +95,8 @@ const SlotConfig = () => {
         const newConfig = await axios.get('http://localhost:5001/api/slots/config');
         setConfig({
           max_slots: newConfig.data.max_slots,
-          location: newConfig.data.location
+          location: newConfig.data.location,
+          department: newConfig.data.department
         });
       } else {
         setMessage(response.data.message || 'Update failed');
@@ -97,6 +125,10 @@ const SlotConfig = () => {
       setIsLoading(false);
     }
   };
+
+  const filteredSuggestions = departmentSuggestions.filter(dept =>
+    dept.toLowerCase().includes(config.department.toLowerCase())
+  );
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -134,6 +166,34 @@ const SlotConfig = () => {
             disabled={isLoading}
             placeholder="Enter location name"
           />
+        </div>
+
+        <div className="mb-4 relative">
+          <label className="block text-sm font-medium mb-1">Department</label>
+          <input
+            type="text"
+            value={config.department}
+            onChange={handleDepartmentChange}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="w-full p-2 border rounded"
+            required
+            disabled={isLoading}
+            placeholder="Type department name"
+          />
+          {showSuggestions && filteredSuggestions.length > 0 && (
+            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+              {filteredSuggestions.map((suggestion) => (
+                <li
+                  key={suggestion}
+                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  onMouseDown={() => selectSuggestion(suggestion)}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <button

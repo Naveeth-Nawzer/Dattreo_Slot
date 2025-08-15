@@ -25,11 +25,16 @@ const TrackQueue = ({ userId }) => {
   const slotIdFromQuery = params.get('slotId');
   const effectiveUserId = userIdFromQuery ? parseInt(userIdFromQuery, 10) : userId;
   const [slots, setSlots] = useState([]);
+  const [filteredSlots, setFilteredSlots] = useState([]);
   const [currentServing, setCurrentServing] = useState(null);
   const [userPosition, setUserPosition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalSpots, setTotalSpots] = useState(0);
+  const [locations, setLocations] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const optimisticAppliedRef = useRef(false);
 
   const fetchQueue = useCallback(async (signal) => {
@@ -52,7 +57,16 @@ const TrackQueue = ({ userId }) => {
   
       const slotsData = response.data.data;
       setSlots(slotsData);
-      setTotalSpots(slotsData.length);
+      
+      // Extract unique locations and departments from slots
+      const uniqueLocations = [...new Set(slotsData.map(slot => slot.slot_location || 'Main Office'))];
+      setLocations(uniqueLocations);
+      
+      const uniqueDepartments = [...new Set(slotsData.map(slot => slot.patient_department || '').filter(Boolean))];
+      setDepartments(uniqueDepartments);
+      
+      // Apply filters to the new data
+      applyFilters(slotsData, selectedLocation, selectedDepartment);
 
       const serving = slotsData.find(slot => (slot.status || '').toLowerCase() === 'serving');
       setCurrentServing(serving ? serving.slot_number : null);
@@ -78,7 +92,41 @@ const TrackQueue = ({ userId }) => {
     } finally {
       setLoading(false);
     }
-  }, [effectiveUserId, t]);
+  }, [effectiveUserId, t, selectedLocation, selectedDepartment]);
+
+  const applyFilters = (slotsData, locationFilter, departmentFilter) => {
+    let filtered = slotsData;
+    
+    if (locationFilter) {
+      filtered = filtered.filter(slot => slot.slot_location === locationFilter);
+    }
+    
+    if (departmentFilter) {
+      filtered = filtered.filter(slot => slot.patient_department === departmentFilter);
+    }
+    
+    setFilteredSlots(filtered);
+    setTotalSpots(filtered.length);
+  };
+
+  const handleLocationChange = (e) => {
+    const newLocation = e.target.value;
+    setSelectedLocation(newLocation);
+    applyFilters(slots, newLocation, selectedDepartment);
+  };
+
+  const handleDepartmentChange = (e) => {
+    const newDepartment = e.target.value;
+    setSelectedDepartment(newDepartment);
+    applyFilters(slots, selectedLocation, newDepartment);
+  };
+
+  const resetFilters = () => {
+    setSelectedLocation('');
+    setSelectedDepartment('');
+    setFilteredSlots(slots);
+    setTotalSpots(slots.length);
+  };
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -206,9 +254,61 @@ const TrackQueue = ({ userId }) => {
           </div>
   
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">{t('queue.queuePositions')}</h3>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <h3 className="text-xl font-semibold text-gray-800">{t('queue.queuePositions')}</h3>
+              
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <div className="flex items-center w-full sm:w-auto">
+                  <label htmlFor="location-filter" className="mr-2 text-sm text-gray-600 whitespace-nowrap">
+                    {t('queue.filterByLocation')}:
+                  </label>
+                  <select
+                    id="location-filter"
+                    value={selectedLocation}
+                    onChange={handleLocationChange}
+                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-auto"
+                  >
+                    <option value="">{t('queue.selectLocation')}</option>
+                    {locations.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center w-full sm:w-auto">
+                  <label htmlFor="department-filter" className="mr-2 text-sm text-gray-600 whitespace-nowrap">
+                    {t('queue.filterByDepartment')}:
+                  </label>
+                  <select
+                    id="department-filter"
+                    value={selectedDepartment}
+                    onChange={handleDepartmentChange}
+                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-full sm:w-auto"
+                  >
+                    <option value="">{t('queue.selectDepartment')}</option>
+                    {departments.map((department) => (
+                      <option key={department} value={department}>
+                        {department}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {(selectedLocation || selectedDepartment) && (
+                  <button
+                    onClick={resetFilters}
+                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 whitespace-nowrap"
+                  >
+                    {t('queue.resetFilters')}
+                  </button>
+                )}
+              </div>
+            </div>
+            
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
-              {slots.map((slot) => {
+              {filteredSlots.map((slot) => {
                 let spotClass = "bg-gray-200";
                 let iconClass = "text-gray-500";
                 const slotStatus = (slot.status || '').toLowerCase();

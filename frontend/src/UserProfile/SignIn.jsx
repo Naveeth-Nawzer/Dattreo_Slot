@@ -59,6 +59,12 @@ export default function FirstVisitForm() {
 
     const data = await response.json();
     console.log('Login successful:', data);
+
+    localStorage.setItem('userData', JSON.stringify({
+        nic: formData.nic,
+        emailormobile: formData.emailormobile,
+        ...data.user // assuming the API returns additional user data
+      }));
     
     // Handle successful registration (redirect, show success message, etc.)
     // Example:
@@ -68,6 +74,9 @@ export default function FirstVisitForm() {
   } catch (error) {
     console.error('Registration error:', error);
     setError(error.message || 'Something went wrong. Please try again.');
+
+          localStorage.removeItem('userData');
+
   } finally {
     setIsSubmitting(false);
   }

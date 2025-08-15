@@ -604,3 +604,63 @@ exports.getAllPatientAppointments = async (req, res) => {
     });
   }
 };
+
+// In your backend controller
+exports.getPatientAppointments = async (req, res) => {
+  try {
+    const { nic } = req.query;
+    
+    if (!nic) {
+      return res.status(400).json({
+        success: false,
+        error: "NIC parameter is required"
+      });
+    }
+
+    // Query patients table directly since no bookings table exists
+    const query = `
+      SELECT 
+        id AS patient_id,
+        name, 
+        nic, 
+        number AS mobile,
+        hospital,
+        department,
+        created_at AS appointment_date,
+        location,
+        booking_status
+      FROM patients
+      WHERE nic = $1
+      ORDER BY created_at DESC
+    `;
+    
+    const { rows } = await pool.query(query, [nic]);
+    
+    if (rows.length === 0) {
+      return res.json({
+        success: true,
+        message: "No appointments found for this NIC",
+        appointments: []
+      });
+    }
+    
+    // Format as appointments
+    const appointments = rows.map(row => ({
+      ...row,
+      booking_date: row.appointment_date,
+      booking_status: row.status
+    }));
+
+    res.json({
+      success: true,
+      appointments
+    });
+  } catch (err) {
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch appointments",
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};

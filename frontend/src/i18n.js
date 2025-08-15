@@ -26,8 +26,13 @@ const resources = {
         queuePositions: "Queue Positions",
         position: "Position",
         bookedByOthers: "Booked by others",
-        available: "Available"
-      },
+        available: "Available",
+        filterByLocation: "Filter by location",
+        filterByDepartment: "Filter by department",
+        selectLocation: "Select location",
+        selectDepartment: "Select department",
+        resetFilters: "Reset filters"
+      },      
       waitTime: {
         unknown: "Unknown",
         now: "Now",

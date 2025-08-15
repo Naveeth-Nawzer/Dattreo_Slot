@@ -92,25 +92,55 @@ exports.updateConfig = async (req, res) => {
   }
 };
 
+// exports.getConfig = async (req, res) => {
+//   try {
+//     const result = await pool.query(
+//       `SELECT max_slots, location FROM slot_config WHERE config_id = 1`
+//     );
+    
+//     if (result.rows.length === 0) {
+//       // If no config exists, return defaults
+//       return res.json({ 
+//         success: true,
+//         max_slots: 20,
+//         location: 'Main Office'
+//       });
+//     }
+    
+//     res.json({ 
+//       success: true,
+//       max_slots: result.rows[0].max_slots,
+//       location: result.rows[0].location
+//     });
+//   } catch (err) {
+//     console.error('Error fetching config:', err);
+//     res.status(500).json({ 
+//       success: false,
+//       message: 'Failed to fetch configuration',
+//       error: process.env.NODE_ENV === 'development' ? err.message : undefined
+//     });
+//   }
+// };
 exports.getConfig = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT max_slots, location FROM slot_config WHERE config_id = 1`
+      `SELECT max_slots, location, department FROM slot_config WHERE config_id = 1`
     );
     
     if (result.rows.length === 0) {
-      // If no config exists, return defaults
       return res.json({ 
         success: true,
         max_slots: 20,
-        location: 'Main Office'
+        location: 'Main Office',
+        department: 'General'
       });
     }
     
     res.json({ 
       success: true,
       max_slots: result.rows[0].max_slots,
-      location: result.rows[0].location
+      location: result.rows[0].location,
+      department: result.rows[0].department
     });
   } catch (err) {
     console.error('Error fetching config:', err);
@@ -121,7 +151,6 @@ exports.getConfig = async (req, res) => {
     });
   }
 };
-
 
 exports.getAllSlots = async (req, res) => {
   try {
@@ -708,6 +737,73 @@ exports.updateStatus = async (req, res) => {
     res.status(500).json({ 
       error: 'Internal server error',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// In your backend controller
+exports.getDepartments = async (req, res) => {
+  try {
+    // This could query your database for unique departments
+    // or return a predefined list
+    const result = await pool.query(
+      `SELECT DISTINCT department FROM slots WHERE department IS NOT NULL`
+    );
+    
+    const departments = result.rows.map(row => row.department);
+    
+    res.json({
+      success: true,
+      data: departments.length ? departments : ['General', 'Cardiology', 'Pediatrics']
+    });
+  } catch (err) {
+    console.error('Error fetching departments:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch departments'
+    });
+  }
+};
+
+// In your slots controller
+exports.getQRCode = async (req, res) => {
+  try {
+    const { nic } = req.query;
+    
+    if (!nic) {
+      return res.status(400).json({
+        success: false,
+        error: "NIC parameter is required"
+      });
+    }
+
+    const query = `
+      SELECT qr_code_path 
+      FROM slots 
+      WHERE user_id = (SELECT id FROM patients WHERE nic = $1)
+      AND qr_code_path IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    
+    const { rows } = await pool.query(query, [nic]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "No QR code found for this user"
+      });
+    }
+    
+    res.json({
+      success: true,
+      qrCodeUrl: rows[0].qr_code_path
+    });
+  } catch (err) {
+    console.error("Error fetching QR code:", err);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch QR code"
     });
   }
 };
