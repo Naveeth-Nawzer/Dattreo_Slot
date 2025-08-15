@@ -1,19 +1,16 @@
-import React from 'react'
-import Vector_24 from '../assets/Vector_24.png'
-import Vector_25 from '../assets/Vector_25.png'
-import wavebg from '../assets/wavebg.png'
+import React from 'react';
+import wavebg from '../assets/wavebg.png';
 
 const BrushTealWaves = () => {
   return (
-    < >
-    <div className='fixed w-full h-screen mx-[-150px] my-[-100px]'>
-        <img 
+    <div className="fixed inset-0 z-[-1] overflow-hidden">
+      <img
         src={wavebg}
-        alt='wavebg'
-        />  
+        alt="wave background"
+        className="w-full h-full object-cover"
+      />
     </div>
-    </>
-  )
-}
+  );
+};
 
-export default BrushTealWaves
+export default BrushTealWaves;

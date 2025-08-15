@@ -122,19 +122,19 @@ export default function FirstVisitForm() {
 };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center px-4 py-8">
       <TealWaveBackground/>
       <BrushTealWaves/>
 
       {/* Main card container */}
-      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex max-w-4xl w-full overflow-hidden">
+      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex flex-col md:flex-row max-w-4xl w-full overflow-hidden">
         {/* Left side form */}
-        <div className="p-9 flex flex-col text-start flex-1 max-w-md">
-          <h2 className="text-3xl font-medium text-gray-900 mb-8">
+        <div className="p-6 sm:p-9 flex flex-col text-start flex-1">
+          <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-6 sm:mb-8">
             Book Your <br /><span className="text-[#0A8F70] font-bold">First Visit</span>
           </h2>
 
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-6 sm:gap-8" onSubmit={handleSubmit}>
             <label className="block text-sm font-normal text-gray-700">
               Name
               <input
@@ -229,12 +229,12 @@ export default function FirstVisitForm() {
             </p>
         </div>
 
-        <div className="flex items-center justify-center relative flex-1">
+        <div className="flex items-center justify-center p-4 sm:p-6 relative flex-1">
           <div className="relative w-80 h-96"></div>
           <img 
             src={register}
             alt="register_img"
-            className="w-[450px] h-[550px] mr-[50px]"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto object-contain"
           />
         </div>
       </div>

@@ -1,6 +1,23 @@
 import React from "react";
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import PageNavigator from "../Components/PageNavigator"
 
 export default function MyAppointment() {
+   const routesOrder = [
+    "/OnboardingPage2",
+    "/OnboardingPage",
+    "/LanguageSelection",
+    "/Firstvist",
+    "/Register",
+    "/SignIn",
+    "/home",
+    "/BookingAppointment",
+    "/MyAppointment", 
+    "/",
+    "/profile",
+    "/Finder",         
+    "/SlotConfig" ];
   const appointments = [
     {
       name: "Henry Cavil",
@@ -23,7 +40,11 @@ export default function MyAppointment() {
   ];
 
   return (
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
+      <TealWaveBackground/>
+      <BrushTealWaves/>
       {/* Heading */}
       <div className="w-full max-w-2xl">
         <h1 className="text-5xl font-bold text-teal-500">My</h1>
@@ -49,6 +70,7 @@ export default function MyAppointment() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }

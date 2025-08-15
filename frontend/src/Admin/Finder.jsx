@@ -1,5 +1,8 @@
 import React from 'react'
 import { User } from "lucide-react";
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import PageNavigator from "../Components/PageNavigator"
 
 const Finder = () => {
   // Queue data
@@ -7,9 +10,27 @@ const Finder = () => {
   const totalSpots = 50;
   const currentServing = 5; // Currently serving position 5 (6th person)
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+  const routesOrder = [
+    "/OnboardingPage2",
+    "/OnboardingPage",
+    "/LanguageSelection",
+    "/Firstvist",
+    "/Register",
+    "/SignIn",
+    "/home",
+    "/BookingAppointment",
+    "/MyAppointment", 
+    "/",
+    "/profile",
+    "/Finder",         
+    "/SlotConfig" ];
 
+  return (
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
+    <div className="min-h-screen bg-transparent flex flex-col">
+      <TealWaveBackground/>
+      <BrushTealWaves/>
 
       {/* Main Content */}
       <main className="flex-1 py-10 px-4 sm:px-6">
@@ -39,7 +60,7 @@ const Finder = () => {
           {/* Queue Visualization */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-6">Queue Positions</h3>
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-10 gap-4">
               {Array.from({ length: totalSpots }).map((_, index) => {
                 let spotClass = "bg-gray-200";
                 let iconClass = "text-gray-500";
@@ -89,6 +110,7 @@ const Finder = () => {
           </div>
         </div>
       </main>
+    </div>
     </div>
   );
 }

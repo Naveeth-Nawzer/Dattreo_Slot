@@ -454,6 +454,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import PageNavigator from "../Components/PageNavigator"
 
 // Constants
 const BACKEND_URL = 'http://localhost:5001/api';
@@ -479,6 +482,22 @@ const TrackQueue = ({ userId }) => {
   const [error, setError] = useState(null);
   const [totalSpots, setTotalSpots] = useState(0);
   const optimisticAppliedRef = useRef(false);
+
+
+  const routesOrder = [
+    "/OnboardingPage2",
+    "/OnboardingPage",
+    "/LanguageSelection",
+    "/Firstvist",
+    "/Register",
+    "/SignIn",
+    "/home",
+    "/BookingAppointment",
+    "/MyAppointment", 
+    "/",
+    "/profile",
+    "/Finder",         
+    "/SlotConfig" ];
 
   const fetchQueue = useCallback(async (signal) => {
     try {
@@ -610,7 +629,11 @@ const TrackQueue = ({ userId }) => {
   }
 
   return (
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <TealWaveBackground/>
+      <BrushTealWaves/>
       <main className="flex-1 py-10 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-xl shadow-md p-6 mb-10">
@@ -641,7 +664,7 @@ const TrackQueue = ({ userId }) => {
   
           <div className="bg-white rounded-xl shadow-md p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-6">Queue Positions</h3>
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-10 gap-4">
               {slots.map((slot) => {
                 let spotClass = "bg-gray-200";
                 let iconClass = "text-gray-500";
@@ -694,6 +717,7 @@ const TrackQueue = ({ userId }) => {
           </div>
         </div>
       </main>
+    </div>
     </div>
   );
 };
