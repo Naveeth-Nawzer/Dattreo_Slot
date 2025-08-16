@@ -16,7 +16,7 @@ if (!fs.existsSync(qrCodeDir)) {
 
 
 
-async function resetSlots(maxSlots, location) {
+async function resetSlots(maxSlots, location, department) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -24,9 +24,9 @@ async function resetSlots(maxSlots, location) {
     await client.query('DELETE FROM slots');
     
     await client.query(
-      `INSERT INTO slots (slot_number, status, location)
-       SELECT generate_series(1, $1), 'available', $2`,
-      [maxSlots, location]
+      `INSERT INTO slots (slot_number, status, location , department)
+       SELECT generate_series(1, $1), 'available', $2, $3`,
+      [maxSlots, location, department]
     );
     
     await client.query('COMMIT');
@@ -39,7 +39,7 @@ async function resetSlots(maxSlots, location) {
 }
 
 exports.updateConfig = async (req, res) => {
-  const { max_slots, location } = req.body;
+  const { max_slots, location, department } = req.body;
 
   if (!max_slots || isNaN(max_slots) || max_slots < 1) {
     return res.status(400).json({ 
@@ -54,22 +54,23 @@ exports.updateConfig = async (req, res) => {
 
     // Update configuration
     const result = await client.query(`
-      INSERT INTO slot_config (config_id, max_slots, location)
-      VALUES (1, $1, $2)
+      INSERT INTO slot_config (config_id, max_slots, location, department)
+      VALUES (1, $1, $2, $3)
       ON CONFLICT (config_id) 
-      DO UPDATE SET max_slots = EXCLUDED.max_slots, location = EXCLUDED.location
-      RETURNING max_slots, location
-    `, [max_slots, location || 'Main Office']);
+      DO UPDATE SET max_slots = EXCLUDED.max_slots, location = EXCLUDED.location, department = EXCLUDED.department
+      RETURNING max_slots, location, department
+    `, [max_slots, location || 'Main Office', department || 'General']);
 
     // Reset slots with location
-    await resetSlots(max_slots, location || 'Main Office');
+    await resetSlots(max_slots, location || 'Main Office', department || 'General');
     
     await client.query('COMMIT');
     
     res.json({ 
       success: true, 
       max_slots: result.rows[0].max_slots,
-      location: result.rows[0].location
+      location: result.rows[0].location,
+      department: result.rows[0].department
     });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -167,7 +168,7 @@ exports.getAllSlots = async (req, res) => {
         p.nic as patient_nic,
         p.number as patient_number,
         p.hospital as patient_hospital,
-        p.department as patient_department
+        s.department as patient_department
       FROM slots s
       LEFT JOIN patients p ON s.user_id = p.id
       ORDER BY s.slot_number ASC
