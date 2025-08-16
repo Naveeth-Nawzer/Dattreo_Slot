@@ -19,6 +19,12 @@ import SlotConfig from './Admin/SlotConfig';
 import i18n from './i18n';
 import AttendanceScanner from './Admin/AttendanceScanner'
 import QRCodePage from './pages/QRCodePage';
+import AdminDashboard from './Admin/admin';
+import PredefinedNotifications from './Admin/adminmessage';
+import Adminqueue from './Admin/adminqueue';
+import AdminSettings from './Admin/adminform.jsx';
+import AdminLogout from './Admin/logout.jsx';
+
 
 function App() {
   const [count, setCount] = useState(0);
@@ -43,6 +49,11 @@ function App() {
           <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
           <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
           <Route path='/qr' element={<QRCodePage />} />
+          <Route path='/admin' element={<AdminDashboard />} />
+          <Route path='/adminmessage' element={<PredefinedNotifications />} />
+          <Route path='/adminqueue' element={<Adminqueue />} />
+          <Route path='/adminsettings' element={<AdminSettings />} />
+          <Route path='/adminlogout' element={<AdminLogout />} />
         </Routes>
       </BrowserRouter>
     </I18nextProvider>
