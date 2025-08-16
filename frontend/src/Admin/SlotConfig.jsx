@@ -34,8 +34,9 @@ const SlotConfig = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [configData, setConfigData] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [locations, setLocations] = useState(['Main Office']);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -45,19 +46,14 @@ const SlotConfig = () => {
         const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
         if (allConfigs.data.success) {
           setConfigData(allConfigs.data.configurations);
+          
+          // Extract unique departments and locations from existing configs
+          const departments = [...new Set(allConfigs.data.configurations.map(c => c.department))];
+          const locations = [...new Set(allConfigs.data.configurations.map(c => c.location))];
+          
+          setDepartmentSuggestions(departments.length ? departments : ['General', 'Cardiology', 'Pediatrics']);
+          setLocationSuggestions(locations.length ? locations : ['Main Office']);
         }
-
-        // // Fetch available departments
-        // const deptResponse = await axios.get('http://localhost:5001/api/slots/departments');
-        // if (deptResponse.data.success) {
-        //   setDepartmentSuggestions(deptResponse.data.data || ['General', 'Cardiology', 'Pediatrics']);
-        // }
-
-        // // Fetch unique locations
-        // const locResponse = await axios.get('http://localhost:5001/api/slots/locations');
-        // if (locResponse.data.success) {
-        //   setLocations(locResponse.data.data || ['Main Office']);
-        // }
 
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
@@ -78,12 +74,24 @@ const SlotConfig = () => {
     setShowSuggestions(true);
   };
 
-  const selectSuggestion = (suggestion) => {
+  const handleLocationChange = (e) => {
     setConfig({
       ...config,
-      department: suggestion
+      location: e.target.value
     });
-    setShowSuggestions(false);
+    setShowLocationSuggestions(true);
+  };
+
+  const selectSuggestion = (suggestion, field) => {
+    setConfig({
+      ...config,
+      [field]: suggestion
+    });
+    if (field === 'department') {
+      setShowSuggestions(false);
+    } else {
+      setShowLocationSuggestions(false);
+    }
   };
 
   const handleAddNew = () => {
@@ -159,6 +167,12 @@ const SlotConfig = () => {
         const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
         setConfigData(allConfigs.data.configurations);
         
+        // Update suggestions
+        const departments = [...new Set(allConfigs.data.configurations.map(c => c.department))];
+        const locations = [...new Set(allConfigs.data.configurations.map(c => c.location))];
+        setDepartmentSuggestions(departments);
+        setLocationSuggestions(locations);
+        
         // Reset form
         setConfig({
           max_slots: 20,
@@ -200,6 +214,12 @@ const SlotConfig = () => {
         setMessage('Configuration deleted successfully');
         const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
         setConfigData(allConfigs.data.configurations);
+        
+        // Update suggestions
+        const departments = [...new Set(allConfigs.data.configurations.map(c => c.department))];
+        const locations = [...new Set(allConfigs.data.configurations.map(c => c.location))];
+        setDepartmentSuggestions(departments);
+        setLocationSuggestions(locations);
       }
     } catch (err) {
       console.error('Delete error:', err);
@@ -219,8 +239,12 @@ const SlotConfig = () => {
     setIsAddingNew(false);
   };
 
-  const filteredSuggestions = departmentSuggestions.filter(dept =>
+  const filteredDeptSuggestions = departmentSuggestions.filter(dept =>
     dept.toLowerCase().includes(config.department.toLowerCase())
+  );
+
+  const filteredLocSuggestions = locationSuggestions.filter(loc =>
+    loc.toLowerCase().includes(config.location.toLowerCase())
   );
 
   return (
@@ -270,20 +294,30 @@ const SlotConfig = () => {
 
               <div className="relative">
                 <label className="block text-sm font-medium mb-1">Location</label>
-                <select
+                <input
+                  type="text"
                   value={config.location}
-                  onChange={(e) => setConfig({
-                    ...config, 
-                    location: e.target.value
-                  })}
+                  onChange={handleLocationChange}
+                  onFocus={() => setShowLocationSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
                   className="w-full p-2 border rounded"
                   required
                   disabled={isLoading}
-                >
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
+                  placeholder="Enter location"
+                />
+                {showLocationSuggestions && filteredLocSuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredLocSuggestions.map((suggestion) => (
+                      <li
+                        key={suggestion}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onMouseDown={() => selectSuggestion(suggestion, 'location')}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="relative">
@@ -299,13 +333,13 @@ const SlotConfig = () => {
                   disabled={isLoading}
                   placeholder="Type department name"
                 />
-                {showSuggestions && filteredSuggestions.length > 0 && (
+                {showSuggestions && filteredDeptSuggestions.length > 0 && (
                   <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                    {filteredSuggestions.map((suggestion) => (
+                    {filteredDeptSuggestions.map((suggestion) => (
                       <li
                         key={suggestion}
                         className="p-2 hover:bg-gray-100 cursor-pointer"
-                        onMouseDown={() => selectSuggestion(suggestion)}
+                        onMouseDown={() => selectSuggestion(suggestion, 'department')}
                       >
                         {suggestion}
                       </li>
