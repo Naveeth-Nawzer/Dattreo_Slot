@@ -136,7 +136,8 @@ const router = express.Router();
 const pool = require("../db/db");
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
-
+// or for ES modules:
+// import bcrypt from 'bcrypt';
 // Login validation
 const validateLogin = [
   body('nic')
@@ -220,7 +221,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, nic, emailOrMobile, passcode } = req.body;
+    const { name, nic, emailormobile, passcode } = req.body;
 
     // Check if NIC already exists
     const existingUser = await pool.query(
@@ -235,14 +236,16 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    const hashedPasscode = await bcrypt.hash(passcode, 10);
+    // Hash the password with bcrypt
+    const saltRounds = 10;
+    const hashedPasscode = await bcrypt.hash(passcode, saltRounds);
 
     // Insert new user
     const result = await pool.query(
-      `INSERT INTO users (name, nic, emailOrMobile, passcode)
+      `INSERT INTO users (name, nic, emailormobile, passcode)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, name, nic, emailOrMobile`,
-      [name, nic, emailOrMobile, hashedPasscode]
+       RETURNING id, name, nic, emailormobile`,
+      [name, nic, emailormobile, hashedPasscode]
     );
 
     res.status(201).json({
@@ -260,7 +263,6 @@ router.post('/register', async (req, res) => {
     });
   }
 });
-
 
 
 // Update Profile validation
