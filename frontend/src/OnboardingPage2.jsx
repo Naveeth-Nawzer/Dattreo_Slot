@@ -1,9 +1,20 @@
-import React from 'react'
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TealWaveBackground from "./Components/TealWaveBackground";
-import logo from "./assets/logo.png"
-import BrushTealWaves from './Components/BrushTealWaves'
+import BrushTealWaves from './Components/BrushTealWaves';
 
 const OnboardingPage2 = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Wait 2 seconds, then go to home page
+    const timer = setTimeout(() => {
+      navigate('/home');
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <div className="fixed w-full h-screen">
       {/* Static background */}
@@ -12,16 +23,12 @@ const OnboardingPage2 = () => {
         <BrushTealWaves />
       </div>
 
-      {/* Centered logo */}
-      {/* <div className="flex items-center justify-center w-full h-full relative z-10">
-        <img
-          src={logo}
-          alt="logo"
-          className="w-[500px] mr-[300px] mb-[60px] object-contain"
-        />
-      </div> */}
+      {/* Optional message or animation */}
+      <div className="flex items-center justify-center w-full h-full relative z-10 animate-slideIn">
+        <h1 className="text-white text-4xl font-bold">Almost There!</h1>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default OnboardingPage2
+export default OnboardingPage2;

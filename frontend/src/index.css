@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* small helper to soften focus outlines */
+:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* optional: smoother font rendering for the demo */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 body {
   font-family: 'Inter', sans-serif;
 }

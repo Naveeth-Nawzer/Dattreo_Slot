@@ -1,58 +1,194 @@
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react"; // You can install lucide-react or replace with your own icons
+import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import TealWaveBackground from "../Components/TealWaveBackground";
 import BrushTealWaves from '../Components/BrushTealWaves'
 import register from '../assets/first_visit.png'
 
-
 export default function FirstVisitForm() {
-  const [passVisible, setPassVisible] = useState(false);
-  const [confirmPassVisible, setConfirmPassVisible] = useState(false);
+  const [passVisible, setPassVisible] = useState(true);
+  const navigate = useNavigate();
+  const [confirmPassVisible, setConfirmPassVisible] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({
+    name: '',
+    nic: '',
+    emailOrmobile: '',
+    passcode: '',
+    confirmPasscode: ''
+  });
+
+  const validateNIC = (nic) => {
+    // Validate Sri Lankan NIC (old 10-digit or new 12-digit format)
+    const oldNicPattern = /^[0-9]{9}[vVxX]$/;
+    const newNicPattern = /^[0-9]{12}$/;
+    return oldNicPattern.test(nic) || newNicPattern.test(nic);
+  };
+
+  const validateEmailOrmobile = (value) => {
+    // Validate email
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Validate Sri Lankan mobile number (07X, 07XX formats)
+    const mobilePattern = /^0[1-9][0-9]{8}$/;
+    return emailPattern.test(value) || mobilePattern.test(value);
+  };
+
+  const validatePassword = (passcode) => {
+  // Only numbers, exactly 6 digits
+  const passwordPattern = /^\d{6,}$/;
+  return passwordPattern.test(passcode);
+};
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.nic.trim()) {
+      newErrors.nic = 'NIC is required';
+    } else if (!validateNIC(formData.nic)) {
+      newErrors.nic = 'Please enter a valid NIC number';
+    }
+
+    if (!formData.emailOrmobile.trim()) {
+      newErrors.emailOrmobile = 'Email or mobile number is required';
+    } else if (!validateEmailOrmobile(formData.emailOrmobile)) {
+      newErrors.emailOrmobile = 'Please enter a valid email or mobile number';
+    }
+
+    if (!formData.passcode) {
+      newErrors.passcode = 'Passcode is required';
+    } else if (!validatePassword(formData.passcode)) {
+      newErrors.passcode = 'Passcode must be at least 6 number';
+    }
+
+    if (!formData.confirmPasscode) {
+      newErrors.confirmPasscode = 'Please confirm your passcode';
+    } else if (formData.passcode !== formData.confirmPasscode) {
+      newErrors.confirmPasscode = 'Passcodes do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (validateForm()) {
+    try {
+      const response = await fetch('http://localhost:5001/UserOperation/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          nic: formData.nic,
+          emailormobile: formData.emailOrmobile, // Changed to match backend
+          passcode: formData.passcode
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Registration successful:', data);
+
+      localStorage.setItem('userData', JSON.stringify({
+        nic: formData.nic,
+        emailormobile: formData.emailormobile,
+        ...data.user // assuming the API returns additional user data
+      }));
+      
+      // Handle successful registration (redirect, show message, etc.)
+      // Example:
+      navigate('/home');
+      // setSuccessMessage('Registration successful! Please check your email to verify your account.');
+
+    } catch (error) {
+      console.error('Registration failed:', error);
+
+                localStorage.removeItem('userData');
+
+      // Handle errors (show to user)
+      // Example:
+      // setErrorMessage(error.message || 'Registration failed. Please try again.');
+    }
+  }
+};
 
   return (
-    <div className="flex items-center justify-center">
-
+    <div className="flex items-center justify-center px-4 py-8">
       <TealWaveBackground/>
       <BrushTealWaves/>
 
       {/* Main card container */}
-      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex max-w-4xl w-full overflow-hidden">
+      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex flex-col md:flex-row max-w-4xl w-full overflow-hidden">
         {/* Left side form */}
-        <div className="p-12 flex flex-col text-start flex-1 max-w-md">
-          <h2 className="text-3xl font-medium text-gray-900 mb-8">
+        <div className="p-6 sm:p-9 flex flex-col text-start flex-1">
+          <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-6 sm:mb-8">
             Book Your <br /><span className="text-[#0A8F70] font-bold">First Visit</span>
           </h2>
 
-          <form className="flex flex-col gap-6">
+          <form className="flex flex-col gap-6 sm:gap-8" onSubmit={handleSubmit}>
             <label className="block text-sm font-normal text-gray-700">
               Name
               <input
                 type="text"
-                className="mt-1 w-full border-b border-gray-400 focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className={`mt-1 w-full border-b ${errors.name ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]`}
               />
+              {errors.name && <span className="text-red-500 text-xs">{errors.name}</span>}
             </label>
 
             <label className="block text-sm font-normal text-gray-700">
               NIC Number
               <input
                 type="text"
-                className="mt-1 w-full border-b border-gray-400 focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]"
+                name="nic"
+                value={formData.nic}
+                onChange={handleChange}
+                className={`mt-1 w-full border-b ${errors.nic ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]`}
               />
+              {errors.nic && <span className="text-red-500 text-xs">{errors.nic}</span>}
             </label>
 
             <label className="block text-sm font-normal text-gray-700">
               Email / Mobile number
               <input
                 type="text"
-                className="mt-1 w-full border-b border-gray-400 focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]"
+                name="emailOrmobile"
+                value={formData.emailOrmobile}
+                onChange={handleChange}
+                className={`mt-1 w-full border-b ${errors.emailOrmobile ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]`}
               />
+              {errors.emailOrmobile && <span className="text-red-500 text-xs">{errors.emailOrmobile}</span>}
             </label>
 
             <label className="block text-sm font-normal text-gray-700 relative">
               Pass code
               <input
                 type={!passVisible ? "text" : "password"}
-                className="mt-1 w-full border-b border-gray-400 focus:border-teal-600 outline-none px-0 py-1 pr-8 bg-[#F7FBFB]"
+                name="passcode"
+                value={formData.passcode}
+                onChange={handleChange}
+                className={`mt-1 w-full border-b ${errors.passcode ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 pr-8 bg-[#F7FBFB]`}
               />
               <button
                 type="button"
@@ -61,13 +197,17 @@ export default function FirstVisitForm() {
               >
                 {passVisible ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+              {errors.passcode && <span className="text-red-500 text-xs">{errors.passcode}</span>}
             </label>
 
             <label className="block text-sm font-normal text-gray-700 relative">
               Confirm Pass code
               <input
                 type={!confirmPassVisible ? "text" : "password"}
-                className="mt-1 w-full border-b border-gray-400 focus:border-teal-600 outline-none px-0 py-1 pr-8 bg-[#F7FBFB]"
+                name="confirmPasscode"
+                value={formData.confirmPasscode}
+                onChange={handleChange}
+                className={`mt-1 w-full border-b ${errors.confirmPasscode ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 pr-8 bg-[#F7FBFB]`}
               />
               <button
                 type="button"
@@ -76,48 +216,36 @@ export default function FirstVisitForm() {
               >
                 {confirmPassVisible ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+              {errors.confirmPasscode && <span className="text-red-500 text-xs">{errors.confirmPasscode}</span>}
             </label>
 
             <button
               type="submit"
-              className="mt-8 bg-[#F7FBFB] border border-teal-300 text-teal-900 font-medium rounded-xl py-3 hover:bg-teal-50 transition-colors"
+              className="mt-5 bg-[#F7FBFB] border border-teal-300 text-teal-800 font-medium rounded-xl py-3 hover:bg-teal-50 transition-colors"
             >
               Confirm
             </button>
           </form>
+
+          <p className="text-sm font-medium text-gray-800 text-center mt-4">
+              Already have an account?{' '}
+              <button 
+                type="button"
+                onClick={() => navigate('/SignIn')}
+                className="text-teal-600 font-semibold hover:underline hover:text-teal-900"
+              >
+                Sign in
+              </button>
+            </p>
         </div>
 
-        <div className="flex items-center justify-center relative flex-1">
-          {/* Right side big green shape */}
-          <div className="relative w-80 h-96">
-            {/* <div className="w-40 h-40 
-                bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] 
-                from-[#4CDBB9] to-[#297563] 
-                rounded-tr-[30%] rounded-bl-[30%] 
-                rounded-tl-[30%] rounded-br-[30%]
-                rotate-[-35deg]">
-</div>
-
-
-<div className="absolute top-10 left-5 w-[300px] h-[400px]
-                bg-[radial-gradient(ellipse_at_top_right,_#4CDBB9,_#297563)]
-                clip-path-[polygon(0%_0%,_100%_0%,_75%_100%,_25%_100%)]
-                shadow-inner
-                rounded-tr-[20%] rounded-bl-[20%] 
-                rounded-tl-[50%] rounded-br-[20%]">
-</div> */}
-
-            {/* Optional top-left small shape */}
-            {/* <div className="absolute top-[-20px] left-10 w-32 h-20
-                            bg-gradient-to-tr from-teal-300 to-teal-500
-                            rounded-full
-                            rotate-12">
-            </div> */}
-          </div>
+        <div className="flex items-center justify-center p-4 sm:p-6 relative flex-1">
+          <div className="relative w-80 h-96"></div>
           <img 
-              src={register}
-              alt="register_img"
-              className="w-[500px] h-[600px] mr-[50px]"/>
+            src={register}
+            alt="register_img"
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto object-contain"
+          />
         </div>
       </div>
     </div>
