@@ -14,8 +14,6 @@ import SignIn from './UserProfile/SignIn';
 import Home from './Home';
 import OnboardingPage from './OnboardingPage';
 import OnboardingPage2 from './OnboardingPage2';
-import Dashboard from './Admin/Dashboard';
-import AdminNotifications from './Admin/AdminNotification';
 import Signup from './pages/Signup';
 import SlotConfig from './Admin/SlotConfig';
 import i18n from './i18n';
@@ -30,8 +28,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/queue' element={<TrackQueue />} />
-          <Route path='/admin' element={<Dashboard />} />  
-          <Route path='/adminnotifications' element={<AdminNotifications />} />  
           <Route path='/signup' element={<Signup />} />
           <Route path='/BookingAppointment' element={<BookingAppointment />} />
           <Route path='/MyAppointment' element={<MyAppointment />} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import slot from "../assets/slot.png";
 import { GlobeAltIcon, UserCircleIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from 'react-i18next';
@@ -7,11 +7,11 @@ import { useNavigate } from 'react-router-dom';
 const Nav = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
- const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div>
@@ -55,25 +55,25 @@ const Nav = () => {
           </a>
         </nav>
 
-      {/* Right icons */}
-      <div className="hidden sm:flex items-center space-x-3 lg:space-x-4">
+        {/* Right icons */}
+        <div className="hidden sm:flex items-center space-x-3 lg:space-x-4">
           <div className="flex items-center bg-[#4CDBB9] text-white px-2 py-1 rounded-full cursor-pointer text-sm lg:text-base">
             <GlobeAltIcon className="w-4 lg:w-5 h-4 lg:h-5" />
-          <select
-            value={i18n.language}
-            onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-teal-300 bg-clip-text outline-none ml-2 lg:ml-3 text-xs lg:text-sm"
-          >
-            <option value="en">English</option>
-            <option value="ta">தமிழ்</option>
-            <option value="si">සිංහල</option>
-          </select>
-        </div>
+            <select
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="bg-teal-300 bg-clip-text outline-none ml-2 lg:ml-3 text-xs lg:text-sm"
+            >
+              <option value="en">English</option>
+              <option value="ta">தமிழ்</option>
+              <option value="si">සිංහල</option>
+            </select>
+          </div>
 
-        <div className='cursor-pointer'
-              onClick={() => navigate("/profile")}>
-          <UserCircleIcon className="w-7 lg:w-8 h-7 lg:h-8 text-[#4CDBB9]" />
-            </div>
+          <div className='cursor-pointer'
+                onClick={() => navigate("/profile")}>
+            <UserCircleIcon className="w-7 lg:w-8 h-7 lg:h-8 text-[#4CDBB9]" />
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -98,8 +98,8 @@ const Nav = () => {
                 <GlobeAltIcon className="w-5 h-5" />
                 <select
                   value={i18n.language}
-                onChange={(e) => changeLanguage(e.target.value)} 
-                className="bg-teal-300 bg-clip-text outline-none ml-2">
+                  onChange={(e) => changeLanguage(e.target.value)} 
+                  className="bg-teal-300 bg-clip-text outline-none ml-2">
                   <option value="en">English</option>
                   <option value="ta">தமிழ்</option>
                   <option value="si">සිංහල</option>

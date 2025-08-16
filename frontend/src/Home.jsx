@@ -71,7 +71,6 @@ import { useNavigate } from "react-router-dom";
 import peopleImage from "./assets/people.png";
 import Nav from './Components/Nav';
 import TealWaveBackground from './Components/TealWaveBackground';
-import { useLocation, useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
@@ -141,9 +140,11 @@ function Home() {
             />
           </div>
         </div>
-      </main>
+      </main>     
+
     </div>
   );
+
 }
 
 export default Home;
