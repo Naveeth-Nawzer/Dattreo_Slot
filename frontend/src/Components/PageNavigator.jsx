@@ -21,17 +21,17 @@ const PageNavigator = ({ routesOrder }) => {
       <button
         onClick={goPrevious}
         disabled={currentIndex === 0}
-        className="text-teal-500 px-3 py-1 rounded disabled:opacity-50 hover:bg-teal-500 hover:text-white"
+        className="bg-teal-500 text-white px-3 py-1 rounded disabled:opacity-50 hover:bg-transparent hover:text-teal-500"
       >
         ⬅ Prev
       </button>
-      <button
+      {/* <button
         onClick={goNext}
         disabled={currentIndex === routesOrder.length - 1}
-        className="text-teal-500 px-3 py-1 rounded disabled:opacity-50 hover:bg-teal-500 hover:text-white"
+        className="bg-teal-500 text-white px-3 py-1 rounded disabled:opacity-50 hover:bg-transparent hover:text-teal-500"
       >
         Next ➡
-      </button>
+      </button> */}
     </div>
   );
 };

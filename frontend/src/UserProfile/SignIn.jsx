@@ -60,8 +60,8 @@ export default function FirstVisitForm() {
     const data = await response.json();
     console.log('Login successful:', data);
     
-    // Handle successful registration (redirect, show success message, etc.)
-    // Example:
+    localStorage.setItem('userData', JSON.stringify(data.user));
+    
     navigate('/home'); // If using react-router
     // Or show success state
     

@@ -485,19 +485,10 @@ const TrackQueue = ({ userId }) => {
 
 
   const routesOrder = [
-    "/OnboardingPage2",
-    "/OnboardingPage",
-    "/LanguageSelection",
-    "/Firstvist",
-    "/Register",
-    "/SignIn",
+    "/home", 
+    "/TrackQueue",
     "/home",
-    "/BookingAppointment",
-    "/MyAppointment", 
-    "/",
-    "/profile",
-    "/Finder",         
-    "/SlotConfig" ];
+   ];
 
   const fetchQueue = useCallback(async (signal) => {
     try {

@@ -51,9 +51,11 @@ import React from 'react'
 import slot from "../assets/slot.png"
 import { GlobeAltIcon, UserCircleIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from 'react';
+import {useNavigate } from "react-router-dom";
 
 const Nav = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div>
@@ -83,16 +85,16 @@ const Nav = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 lg:space-x-8 text-black font-medium">
-          <a href="#" className="cursor-pointer bg-gradient-to-r from-[#4CDBB9] to-[#0A8F70] bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
+          <a href="/home" className="cursor-pointer bg-gradient-to-r from-[#4CDBB9] to-[#0A8F70] bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
             HOME
           </a>
-          <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
+          <a href="/BookingAppointment" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
             Book Appointment
           </a>
-          <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
+          <a href="/MyAppointment" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
             My Appointments
           </a>
-          <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
+          <a href="/TrackQueue" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors">
             Track Queue
           </a>
         </nav>
@@ -101,29 +103,33 @@ const Nav = () => {
         <div className="hidden sm:flex items-center space-x-3 lg:space-x-4">
           <div className="flex items-center bg-[#4CDBB9] text-white px-2 py-1 rounded-full cursor-pointer text-sm lg:text-base">
             <GlobeAltIcon className="w-4 lg:w-5 h-4 lg:h-5" />
-            <select className="bg-transparent outline-none ml-2 lg:ml-3 text-xs lg:text-sm">
+            <select className="bg-teal-300 bg-clip-text outline-none ml-2 lg:ml-3 text-xs lg:text-sm">
               <option>English</option>
               <option>Tamil</option>
               <option>Sinhala</option>
             </select>
           </div>
+
+          <div className='cursor-pointer'
+              onClick={() => navigate("/profile")}>
           <UserCircleIcon className="w-7 lg:w-8 h-7 lg:h-8 text-[#4CDBB9]" />
+            </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-[#F7FBFB] shadow-lg rounded-b-2xl px-4 py-2">
             <nav className="flex flex-col space-y-4 text-black font-medium">
-              <a href="#" className="cursor-pointer bg-gradient-to-r from-[#4CDBB9] to-[#0A8F70] bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
+              <a href="/home" className="cursor-pointer bg-gradient-to-r from-[#4CDBB9] to-[#0A8F70] bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
                 HOME
               </a>
-              <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
+              <a href="/BookingAppointment" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
                 Book Appointment
               </a>
-              <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
+              <a href="/MyAppointment" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
                 My Appointments
               </a>
-              <a href="#" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
+              <a href="/TrackQueue" className="cursor-pointer bg-gradient-to-r from-black to-black bg-clip-text text-transparent hover:from-[#4CDBB9] hover:to-[#0A8F70] transition-colors py-2">
                 Track Queue
               </a>
             </nav>
@@ -136,7 +142,11 @@ const Nav = () => {
                   <option>Sinhala</option>
                 </select>
               </div>
-              <UserCircleIcon className="w-8 h-8 text-[#4CDBB9]" />
+
+              <div className='cursor-pointer'
+              onClick={() => navigate("/profile")}>
+                <UserCircleIcon className="w-8 h-8 text-[#4CDBB9]"/>
+              </div>
             </div>
           </div>
         )}

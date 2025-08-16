@@ -21,7 +21,7 @@ function App() {
   return (
     <>
     <BrowserRouter> <Routes>    
-    <Route path='/' element={<TrackQueue />} />
+    <Route path='/TrackQueue' element={<TrackQueue />} />
     <Route path='/profile' element={<Profile/>} />
     <Route path='/LanguageSelection' element={<LanguageSelection/>} />
     <Route path='/Firstvist' element={<Firstvist/>} />

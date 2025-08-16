@@ -1,7 +1,7 @@
 import React from 'react'
 import TealWaveBackground from "./Components/TealWaveBackground";
-import logo from "./assets/logo.png"
-import BrushTealWaves from './Components/BrushTealWaves'
+import logo from "./assets/logo.png";
+import BrushTealWaves from './Components/BrushTealWaves';
 
 const OnboardingPage = () => {
   return (
@@ -17,11 +17,14 @@ const OnboardingPage = () => {
         <img
           src={logo}
           alt="logo"
-          className="w-[500px] mr-[300px] mb-[60px] object-contain"
+          className="object-contain 
+            w-[400px] sm:w-[400px] md:w-[400px] lg:w-[500px] 
+            mb-4 sm:mb-8 md:mb-[60px] 
+            mr-16 sm:mr-0 md:mr-[100px] lg:mr-[300px]"
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OnboardingPage
+export default OnboardingPage;

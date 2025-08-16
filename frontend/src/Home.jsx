@@ -104,7 +104,7 @@ function Home() {
               <button onClick={() => navigate("/MyAppointment")} className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4">
                 My <br/> Appointment
               </button>
-              <button onClick={() => navigate("/")} className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4">
+              <button onClick={() => navigate("/TrackQueue")} className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4">
                 Track <br/> Queue
               </button>
               <button onClick={() => navigate("/profile")} className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4">

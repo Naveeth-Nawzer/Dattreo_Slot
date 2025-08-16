@@ -5,19 +5,9 @@ import PageNavigator from "../Components/PageNavigator"
 
 export default function MyAppointment() {
    const routesOrder = [
-    "/OnboardingPage2",
-    "/OnboardingPage",
-    "/LanguageSelection",
-    "/Firstvist",
-    "/Register",
-    "/SignIn",
     "/home",
-    "/BookingAppointment",
     "/MyAppointment", 
-    "/",
-    "/profile",
-    "/Finder",         
-    "/SlotConfig" ];
+  ];
   const appointments = [
     {
       name: "Henry Cavil",
