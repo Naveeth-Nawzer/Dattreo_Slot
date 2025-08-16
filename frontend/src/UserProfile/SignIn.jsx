@@ -62,7 +62,7 @@ export default function FirstVisitForm() {
     
     localStorage.setItem('userData', JSON.stringify(data.user));
     
-    navigate('/home'); // If using react-router
+    navigate('/LanguageSelection'); // If using react-router
     // Or show success state
     
   } catch (error) {

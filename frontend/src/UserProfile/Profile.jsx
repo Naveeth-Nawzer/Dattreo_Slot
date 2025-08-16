@@ -8,32 +8,32 @@ import TealWaveBackground from "../Components/TealWaveBackground";
 import BrushTealWaves from "../Components/BrushTealWaves";
 
 
-const MedicalRecordsStack = () => {
-  return (
-    <div className="relative w-[300px] h-[300px] mt-12">
-      {/* {[...Array(8)].map((_, i) => (
-        <img
-          key={i}
-          src={Records}
-          alt="Medical Record"
-          className="absolute rounded-lg shadow-md"
-          style={{
-            left: i * 15,
-            top: i * -10,
-            zIndex: 10 - i,
-            width: 280,
-            height: 280,
-            transform: `rotate(${i * 4 - 14}deg)`,
-            transition: "transform 0.3s ease",
-          }}
-        />
-      ))} */}
-      {/* <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
-        Medical Records
-      </div> */}
-    </div>
-  );
-};
+// const MedicalRecordsStack = () => {
+//   return (
+//     <div className="relative w-[300px] h-[300px] mt-12">
+//       {/* {[...Array(8)].map((_, i) => (
+//         <img
+//           key={i}
+//           src={Records}
+//           alt="Medical Record"
+//           className="absolute rounded-lg shadow-md"
+//           style={{
+//             left: i * 15,
+//             top: i * -10,
+//             zIndex: 10 - i,
+//             width: 280,
+//             height: 280,
+//             transform: `rotate(${i * 4 - 14}deg)`,
+//             transition: "transform 0.3s ease",
+//           }}
+//         />
+//       ))} */}
+//       {/* <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
+//         Medical Records
+//       </div> */}
+//     </div>
+//   );
+// };
 
 const Profile = () => {
   const navigate = useNavigate();
