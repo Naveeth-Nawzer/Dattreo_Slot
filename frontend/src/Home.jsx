@@ -67,71 +67,66 @@
 
 import React from "react";
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from "react-router-dom";
 import peopleImage from "./assets/people.png";
 import Nav from './Components/Nav';
 import TealWaveBackground from './Components/TealWaveBackground';
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
+  const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-transparent font-sans relative">
-      {/* Background SVGs */}
-      <TealWaveBackground />
+    <>
+      <div className="bg-transparent font-sans">
+        {/* Background SVGs */}
+        <TealWaveBackground/>
 
-        {/* Header */}
+        {/* Header with language selector */}
         <Nav />
 
-      {/* Body */}
-      <main className="flex flex-col md:flex-row items-start justify-between px-8 py-12 relative z-10">
-        {/* Left Content */}
-        <div className="max-w-xl text-left">
-          <h1 className="text-6xl font-bold leading-tight">
-            {t('welcome')} <br />
-            <span className="text-[#4CDBB9]">{t('name')}</span>
-          </h1>
-          <p className="mt-4 text-gray-600">
-            {t('subtitle')}
-          </p>
+        {/* Main content */}
+        <main className="flex flex-col lg:flex-row items-center lg:items-start justify-between px-4 sm:px-8 py-8 gap-16 sm:py-12 lg:min-h-0">
+          {/* Left Content */}
+          <div className="max-w-xl text-center lg:text-left mb-8 lg:mb-0">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+              {t('welcome')} <br />
+              <span className="text-[#4CDBB9]">{t('name')}</span>
+            </h1>
+            <p className="mt-4 text-gray-600 text-sm sm:text-base">
+              {t('subtitle')}
+            </p>
 
-          {/* Buttons */}
-          <div className="grid grid-cols-2 gap-6 mt-8">
-            <button
-              onClick={() => navigate('/queue')}
-              className="bg-[#4CDBB9] text-white font-semibold h-[120px] w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
-            >
-              {t('bookAppointments')}
-            </button>
-
-            <button
-              onClick={() => navigate('/MyAppointment')}
-              className="bg-[#4CDBB9] text-white font-semibold h-[120px] w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
-            >
-              {t('myAppointment')}
-            </button>
-
-            <button
-              onClick={() => navigate('/queue')}
-              className="bg-[#4CDBB9] text-white font-semibold h-[120px] w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
-            >
-              {t('trackQueue')}
-            </button>
-
-            <button
-              onClick={() => navigate('/qr')}
-              className="bg-[#4CDBB9] text-white font-semibold h-[120px] w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
-            >
-              {t('qrCode')}
-            </button>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
+              <button 
+                onClick={() => navigate('/queue')} 
+                className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
+              >
+                {t('bookAppointments')}
+              </button>
+              <button 
+                onClick={() => navigate('/MyAppointment')} 
+                className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
+              >
+                {t('myAppointment')}
+              </button>
+              <button 
+                onClick={() => navigate('/queue')} 
+                className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
+              >
+                {t('trackQueue')}
+              </button>
+              <button 
+                onClick={() => navigate('/qr')} 
+                className="bg-[#4CDBB9] text-white font-semibold h-24 sm:h-[120px] w-full sm:w-[200px] lg:w-[250px] shadow hover:bg-[#0A8F70] flex items-end text-left justify-start p-4 whitespace-pre-line"
+              >
+                {t('qrCode')}
+              </button>
+            </div>
           </div>
 
-          {/* Right Image - Adjusted for mobile */}
+          {/* Right Image */}
           <div className="relative w-full lg:w-auto flex justify-center">
             <img
               src={peopleImage}
@@ -139,12 +134,10 @@ function Home() {
               className="w-full max-w-md sm:max-w-lg lg:w-[550px] object-contain"
             />
           </div>
-        </div>
-      </main>     
-
-    </div>
+        </main>
+      </div>
+    </>
   );
-
 }
 
 export default Home;
