@@ -288,6 +288,31 @@ const validateUpdateProfile = [
     .isMobilePhone().withMessage('Please enter a valid mobile number or email'),
 ];
 
+
+// router.post("/updateProfile", async (req, res) => {
+//   try {
+//     const { nic, name, emailOrMobile } = req.body;
+//     const query = `
+//       UPDATE users
+//       SET name = $1, email_or_mobile = $2
+//       WHERE nic = $3
+//       RETURNING *;
+//     `;
+//     const values = [name, emailOrMobile, nic];
+//     const result = await pool.query(query, values);
+
+//     if (result.rowCount === 0) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     res.json({ message: "Profile updated", user: result.rows[0] });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+
 // Update Profile endpoint
 router.put('/updateProfile', validateUpdateProfile, async (req, res) => {
   try {
@@ -333,6 +358,18 @@ router.put('/updateProfile', validateUpdateProfile, async (req, res) => {
     `;
 
     const result = await pool.query(updateQuery, [name, emailOrMobile, nic]);
+    // Use result.rows[0] instead of undefined 'user' variable
+    const userData = result.rows[0];
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: userData.id,
+        name: userData.name,
+        nic: userData.nic,
+        emailOrMobile: userData.emailOrMobile || ""
+      }
+    });
 
     if (result.rowCount === 1) {
       res.status(200).json({

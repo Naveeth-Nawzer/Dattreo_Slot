@@ -8,32 +8,32 @@ import TealWaveBackground from "../Components/TealWaveBackground";
 import BrushTealWaves from "../Components/BrushTealWaves";
 
 
-const MedicalRecordsStack = () => {
-  return (
-    <div className="relative w-[300px] h-[300px] mt-12">
-      {/* {[...Array(8)].map((_, i) => (
-        <img
-          key={i}
-          src={Records}
-          alt="Medical Record"
-          className="absolute rounded-lg shadow-md"
-          style={{
-            left: i * 15,
-            top: i * -10,
-            zIndex: 10 - i,
-            width: 280,
-            height: 280,
-            transform: `rotate(${i * 4 - 14}deg)`,
-            transition: "transform 0.3s ease",
-          }}
-        />
-      ))} */}
-      {/* <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
-        Medical Records
-      </div> */}
-    </div>
-  );
-};
+// const MedicalRecordsStack = () => {
+//   return (
+//     <div className="relative w-[300px] h-[300px] mt-12">
+//       {/* {[...Array(8)].map((_, i) => (
+//         <img
+//           key={i}
+//           src={Records}
+//           alt="Medical Record"
+//           className="absolute rounded-lg shadow-md"
+//           style={{
+//             left: i * 15,
+//             top: i * -10,
+//             zIndex: 10 - i,
+//             width: 280,
+//             height: 280,
+//             transform: `rotate(${i * 4 - 14}deg)`,
+//             transition: "transform 0.3s ease",
+//           }}
+//         />
+//       ))} */}
+//       {/* <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
+//         Medical Records
+//       </div> */}
+//     </div>
+//   );
+// };
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -92,6 +92,11 @@ const Profile = () => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("userData"); // clear session
+    navigate("/signin"); // redirect to login
+  };
+
   const handleSave = async () => {
     try {
       // Update in backend
@@ -119,6 +124,13 @@ const Profile = () => {
       localStorage.setItem('userData', JSON.stringify(updatedUser));
       
       setProfile({ ...profile, editing: false });
+
+      if (res.data.success) {
+      alert("Profile updated successfully!");
+      setIsEditing(false); // Exit edit mode
+    } else {
+      alert(res.data.message || "Update failed. Please try again.");
+    }
       
     } catch (error) {
       console.error('Update error:', error);
@@ -186,10 +198,10 @@ const Profile = () => {
         {/* Editable profile fields */}
         <div className="w-full space-y-6">
           {[
-            { label: "Name", name: "name", type: "text" },
-            { label: "NIC", name: "nic", type: "text" },
-            { label: "Mobile number or Email", name: "emailOrMobile", type: "text" },
-          ].map(({ label, name, type }) => (
+            { label: "Name", name: "name", type: "text", editable: true },
+            { label: "NIC", name: "nic", type: "text", editable: false },
+            { label: "Mobile number or Email", name: "emailOrMobile", type: "text", editable: true },
+          ].map(({ label, name, type, editable }) => (
             <div
               key={name}
               className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#0A8F70] py-2 text-[#4a8c7e]"
@@ -198,7 +210,7 @@ const Profile = () => {
                 {label}
               </label>
 
-              {profile.editing ? (
+              {profile.editing && editable ? (
                 <input
                   type={type}
                   name={name}
@@ -218,7 +230,7 @@ const Profile = () => {
           <button
             onClick={handleEdit}
             disabled={profile.editing}
-            className={`bg-[#0A8F70] text-white rounded-lg px-8 py-4 font-semibold cursor-pointer hover:bg-[#3b6f67] text-lg md:text-xl transition-colors ${
+            className={`bg-[#0A8F70] text-white rounded-lg px-6 py-4 font-semibold cursor-pointer hover:bg-[#3b6f67] text-lg md:text-md transition-colors ${
               profile.editing ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
@@ -228,12 +240,19 @@ const Profile = () => {
           <button
             onClick={handleSave}
             disabled={!profile.editing}
-            className={`bg-[#0A8F70] text-white rounded-lg px-8 py-4 font-semibold cursor-pointer hover:bg-[#3b6f67] text-lg md:text-xl transition-colors ${
+            className={`bg-[#0A8F70] text-white rounded-lg px-6 py-4 font-semibold cursor-pointer hover:bg-[#3b6f67] text-lg md:text-md transition-colors ${
               !profile.editing ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
             Save
           </button>
+
+          <button
+              onClick={handleLogout}
+              className="bg-red-600 text-white rounded-lg px-6 py-4 font-semibold cursor-pointer hover:bg-red-700 text-lg md:text-lg transition-colors"
+            >
+              Logout
+            </button>
         </div>
       </div>
     </div>

@@ -100,11 +100,18 @@ export default function FirstVisitForm() {
         body: JSON.stringify(formData)
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 409) {
+          alert(data.error || "This NIC/email/mobile is already registered!");
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return;
       }
 
-      const data = await response.json();
+      
       console.log('Registration successful:', data);
 
       localStorage.setItem('userData', JSON.stringify({
@@ -114,8 +121,8 @@ export default function FirstVisitForm() {
       }));
       
       // Handle successful registration (redirect, show message, etc.)
-      // Example:
-      navigate('/home');
+      alert("Registration successful!");
+      navigate('/signin');
       // setSuccessMessage('Registration successful! Please check your email to verify your account.');
 
     } catch (error) {

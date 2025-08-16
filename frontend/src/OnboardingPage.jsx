@@ -42,7 +42,7 @@ const OnboardingPage = () => {
           className="object-contain 
             w-[400px] sm:w-[400px] md:w-[400px] lg:w-[500px] 
             mb-4 sm:mb-8 md:mb-[60px] 
-            mr-16 sm:mr-0 md:mr-[100px] lg:mr-[300px]"
+            mr-[80px] sm:mr-0 md:mr-[100px] lg:mr-[360px]"
         />
       </div>
     </div>
