@@ -13,7 +13,7 @@ export default function FirstVisitForm() {
   const [formData, setFormData] = useState({
     name: '',
     nic: '',
-    emailOrMobile: '',
+    emailOrmobile: '',
     passcode: '',
     confirmPasscode: ''
   });
@@ -25,7 +25,7 @@ export default function FirstVisitForm() {
     return oldNicPattern.test(nic) || newNicPattern.test(nic);
   };
 
-  const validateEmailOrMobile = (value) => {
+  const validateEmailOrmobile = (value) => {
     // Validate email
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     // Validate Sri Lankan mobile number (07X, 07XX formats)
@@ -60,10 +60,10 @@ export default function FirstVisitForm() {
       newErrors.nic = 'Please enter a valid NIC number';
     }
 
-    if (!formData.emailOrMobile.trim()) {
-      newErrors.emailOrMobile = 'Email or mobile number is required';
-    } else if (!validateEmailOrMobile(formData.emailOrMobile)) {
-      newErrors.emailOrMobile = 'Please enter a valid email or mobile number';
+    if (!formData.emailOrmobile.trim()) {
+      newErrors.emailOrmobile = 'Email or mobile number is required';
+    } else if (!validateEmailOrmobile(formData.emailOrmobile)) {
+      newErrors.emailOrmobile = 'Please enter a valid email or mobile number';
     }
 
     if (!formData.passcode) {
@@ -88,16 +88,17 @@ export default function FirstVisitForm() {
   
   if (validateForm()) {
     try {
-      console.log('Form submitted:', formData);
-      
       const response = await fetch('http://localhost:5001/UserOperation/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Include if your API requires authentication
-          // 'Authorization': `Bearer ${token}` 
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          nic: formData.nic,
+          emailormobile: formData.emailOrmobile, // Changed to match backend
+          passcode: formData.passcode
+        })
       });
 
       const data = await response.json();
@@ -179,12 +180,12 @@ export default function FirstVisitForm() {
               Email / Mobile number
               <input
                 type="text"
-                name="emailOrMobile"
-                value={formData.emailOrMobile}
+                name="emailOrmobile"
+                value={formData.emailOrmobile}
                 onChange={handleChange}
-                className={`mt-1 w-full border-b ${errors.emailOrMobile ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]`}
+                className={`mt-1 w-full border-b ${errors.emailOrmobile ? 'border-red-500' : 'border-gray-400'} focus:border-teal-600 outline-none px-0 py-1 bg-[#F7FBFB]`}
               />
-              {errors.emailOrMobile && <span className="text-red-500 text-xs">{errors.emailOrMobile}</span>}
+              {errors.emailOrmobile && <span className="text-red-500 text-xs">{errors.emailOrmobile}</span>}
             </label>
 
             <label className="block text-sm font-normal text-gray-700 relative">
