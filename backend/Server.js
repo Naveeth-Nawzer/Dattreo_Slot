@@ -228,8 +228,10 @@ app.use('/qrcodes', express.static(path.join(__dirname, 'public/qrcodes')));
 const slotsRoutes = require('./routes/SlotsRoutes');
 const bookingRoutes = require('./routes/BookingRoutes');
 const UserOperation = require('./Controllers/UserOperation');
+const slotConfigRoutes = require('./Controllers/slotconfig');
 
 app.use('/api/slots', slotsRoutes);
+app.use('/api/slotsconfig', slotConfigRoutes);
 
 
 app.use('/api/bookings', bookingRoutes); // More specific than just '/api'

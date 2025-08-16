@@ -2,11 +2,20 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from '../Components/Nav';
 import axios from 'axios';
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import PageNavigator from "../Components/PageNavigator"
 
 const QRCodePage = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+   const routesOrder = [
+    "/home", 
+    "/qr",
+    "/home",
+   ];
 
   useEffect(() => {
     const fetchQRCode = async () => {
@@ -73,9 +82,13 @@ const QRCodePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 relative overflow-hidden">
-      <Navbar />
-
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+      <Nav showLanguageSelector={true} />
+      
+      <TealWaveBackground/>
+      <BrushTealWaves/>
       <main className="flex flex-col items-center justify-center p-8 mt-12">
         <div className="bg-white rounded-3xl p-16 shadow-xl text-center max-w-lg w-full">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -104,6 +117,7 @@ const QRCodePage = () => {
           </button>
         </div>
       </main>
+    </div>
     </div>
   );
 };

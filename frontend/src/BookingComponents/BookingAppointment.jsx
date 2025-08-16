@@ -790,7 +790,7 @@ const BookingAppointment = () => {
                 Download QR Code
               </button>
               <button 
-                onClick={() => navigate(`/track-booking?bookingId=${bookingInfo.patient.id}`)}
+                onClick={() => navigate(`/queue`)}
                 className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
               >
                 Track Booking

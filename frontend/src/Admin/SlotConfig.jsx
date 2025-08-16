@@ -4,6 +4,7 @@ import TealWaveBackground from "../Components/TealWaveBackground";
 import BrushTealWaves from '../Components/BrushTealWaves'
 import { useLocation, useNavigate } from "react-router-dom";
 import PageNavigator from "../Components/PageNavigator"
+import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const SlotConfig = () => {
   const routesOrder = [
@@ -19,42 +20,54 @@ const SlotConfig = () => {
     "/",
     "/profile",
     "/Finder",         
-    "/SlotConfig" ];
+    "/SlotConfig"
+  ];
 
   const [config, setConfig] = useState({
     max_slots: 20,
     location: 'Main Office',
-    department: 'General' // Default department
+    department: 'General'
   });
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [departmentSuggestions, setDepartmentSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [configData, setConfigData] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [locations, setLocations] = useState(['Main Office']);
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
-
-  // Fetch current config on component mount
   useEffect(() => {
-    const fetchConfig = async () => {
+    const fetchInitialData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get('http://localhost:5001/api/slots/config');
-        if (response.data.success) {
-          setConfig({
-            max_slots: response.data.max_slots,
-            location: response.data.location || 'Main Office',
-            department: response.data.department || 'General'
-          });
+        // Fetch all configurations
+        const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
+        if (allConfigs.data.success) {
+          setConfigData(allConfigs.data.configurations);
         }
-        
+
+        // // Fetch available departments
+        // const deptResponse = await axios.get('http://localhost:5001/api/slots/departments');
+        // if (deptResponse.data.success) {
+        //   setDepartmentSuggestions(deptResponse.data.data || ['General', 'Cardiology', 'Pediatrics']);
+        // }
+
+        // // Fetch unique locations
+        // const locResponse = await axios.get('http://localhost:5001/api/slots/locations');
+        // if (locResponse.data.success) {
+        //   setLocations(locResponse.data.data || ['Main Office']);
+        // }
+
       } catch (err) {
-        console.error('Failed to fetch config:', err);
-        setMessage(err.response?.data?.message || 'Failed to load configuration');
+        console.error('Failed to fetch initial data:', err);
+        setMessage(err.response?.data?.message || 'Failed to load data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchConfig();
+    fetchInitialData();
   }, []);
 
   const handleDepartmentChange = (e) => {
@@ -73,11 +86,21 @@ const SlotConfig = () => {
     setShowSuggestions(false);
   };
 
+  const handleAddNew = () => {
+    setConfig({
+      max_slots: 20,
+      location: 'Main Office',
+      department: 'General'
+    });
+    setEditingId(null);
+    setIsAddingNew(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     
-    // Validation
     if (!config.max_slots || config.max_slots < 1 || config.max_slots > 1000) {
       setMessage('Slots must be between 1 and 1000');
       return;
@@ -95,55 +118,105 @@ const SlotConfig = () => {
   
     setIsLoading(true);
     try {
-      const response = await axios.put(
-        'http://localhost:5001/api/slots/config',
-        { 
-          max_slots: config.max_slots,
-          location: config.location,
-          department: config.department
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
+      let response;
+      
+      if (editingId) {
+        // Update existing config
+        response = await axios.put(
+          `http://localhost:5001/api/slotsconfig/${editingId}`,
+          { 
+            max_slots: config.max_slots,
+            location: config.location,
+            department: config.department
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
+        );
+      } else {
+        // Create new config
+        response = await axios.post(
+          'http://localhost:5001/api/slotsconfig',
+          { 
+            max_slots: config.max_slots,
+            location: config.location,
+            department: config.department
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
       
       if (response.data.success) {
-        setMessage('Configuration updated successfully!');
-        // Optionally refresh the config
-        const newConfig = await axios.get('http://localhost:5001/api/slots/config');
+        setMessage(editingId ? 'Configuration updated successfully!' : 'Configuration added successfully!');
+        
+        // Refresh config data
+        const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
+        setConfigData(allConfigs.data.configurations);
+        
+        // Reset form
         setConfig({
-          max_slots: newConfig.data.max_slots,
-          location: newConfig.data.location,
-          department: newConfig.data.department
+          max_slots: 20,
+          location: 'Main Office',
+          department: 'General'
         });
-      } else {
-        setMessage(response.data.message || 'Update failed');
+        setEditingId(null);
+        setIsAddingNew(false);
       }
     } catch (err) {
-      console.error('Full update error:', err);
-      let errorMsg = 'Failed to update configuration';
-      
-      if (err.response) {
-        errorMsg = err.response.data?.message || `Server error: ${err.response.status}`;
-        
-        if (err.response.status === 409) {
-          errorMsg = 'Configuration conflict - please refresh and try again';
-        }
-        
-        if (err.response.data?.detail) {
-          console.error('Server error details:', err.response.data.detail);
-          errorMsg += ` (${err.response.data.detail.error || 'no details'})`;
-        }
-      } else if (err.request) {
-        errorMsg = 'No response from server - check backend is running';
-      }
-      
-      setMessage(errorMsg);
+      console.error('Error:', err);
+      setMessage(err.response?.data?.message || 'Operation failed');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEdit = (configItem) => {
+    setConfig({
+      max_slots: configItem.max_slots,
+      location: configItem.location,
+      department: configItem.department
+    });
+    setEditingId(configItem.config_id);
+    setIsAddingNew(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this configuration?')) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      const response = await axios.delete(`http://localhost:5001/api/slotsconfig/${id}`);
+      
+      if (response.data.success) {
+        setMessage('Configuration deleted successfully');
+        const allConfigs = await axios.get('http://localhost:5001/api/slotsconfig/all');
+        setConfigData(allConfigs.data.configurations);
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      setMessage(err.response?.data?.message || 'Failed to delete configuration');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setConfig({
+      max_slots: 20,
+      location: 'Main Office',
+      department: 'General'
+    });
+    setEditingId(null);
+    setIsAddingNew(false);
   };
 
   const filteredSuggestions = departmentSuggestions.filter(dept =>
@@ -154,93 +227,177 @@ const SlotConfig = () => {
     <div>
       <PageNavigator routesOrder={routesOrder}/>
       
-      <div className="w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md mt-[200px] sm:mt-[170px]">
-      <TealWaveBackground/>
-      <BrushTealWaves/>
+      <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md mt-[200px] sm:mt-[170px]">
+        <TealWaveBackground/>
+        <BrushTealWaves/>
 
-      <h2 className="text-lg sm:text-2xl font-bold mb-4 text-center">Slot Configuration</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Max Slots</label>
-          <input
-            type="number"
-            value={config.max_slots}
-            onChange={(e) => setConfig({
-              ...config, 
-              max_slots: Number(e.target.value)
-            })}
-            className="w-full p-2 border rounded"
-            min="1"
-            max="1000"
-            required
-            disabled={isLoading}
-          />
-        </div>
+        {(editingId || isAddingNew) ? (
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 text-center">
+            {editingId ? 'Edit Configuration' : 'Add New Configuration'}
+          </h2>
+        ) : (
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg sm:text-2xl font-bold">Slot Configurations</h2>
+            <button
+              onClick={handleAddNew}
+              className="flex items-center px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+            >
+              <PlusIcon className="h-5 w-5 mr-1" />
+              Add New
+            </button>
+          </div>
+        )}
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Location</label>
-          <input
-            type="text"
-            value={config.location}
-            onChange={(e) => setConfig({
-              ...config, 
-              location: e.target.value
-            })}
-            className="w-full p-2 border rounded"
-            required
-            disabled={isLoading}
-            placeholder="Enter location name"
-          />
-        </div>
+        {(editingId || isAddingNew) && (
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Max Slots</label>
+                <input
+                  type="number"
+                  value={config.max_slots}
+                  onChange={(e) => setConfig({
+                    ...config, 
+                    max_slots: Number(e.target.value)
+                  })}
+                  className="w-full p-2 border rounded"
+                  min="1"
+                  max="1000"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-        <div className="mb-4 relative">
-          <label className="block text-sm font-medium mb-1">Department</label>
-          <input
-            type="text"
-            value={config.department}
-            onChange={handleDepartmentChange}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            className="w-full p-2 border rounded"
-            required
-            disabled={isLoading}
-            placeholder="Type department name"
-          />
-          {showSuggestions && filteredSuggestions.length > 0 && (
-            <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-              {filteredSuggestions.map((suggestion) => (
-                <li
-                  key={suggestion}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                  onMouseDown={() => selectSuggestion(suggestion)}
+              <div className="relative">
+                <label className="block text-sm font-medium mb-1">Location</label>
+                <select
+                  value={config.location}
+                  onChange={(e) => setConfig({
+                    ...config, 
+                    location: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                  required
+                  disabled={isLoading}
                 >
-                  {suggestion}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
 
-        <button
-          type="submit"
-          className="mt-5 bg-teal-500 text-white w-full border border-teal-300 text-teal-800 font-medium rounded-xl py-3 hover:bg-teal-600 transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : 'Save Configuration'}
-        </button>
-      </form>
+              <div className="relative">
+                <label className="block text-sm font-medium mb-1">Department</label>
+                <input
+                  type="text"
+                  value={config.department}
+                  onChange={handleDepartmentChange}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="w-full p-2 border rounded"
+                  required
+                  disabled={isLoading}
+                  placeholder="Type department name"
+                />
+                {showSuggestions && filteredSuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredSuggestions.map((suggestion) => (
+                      <li
+                        key={suggestion}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onMouseDown={() => selectSuggestion(suggestion)}
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
 
-      {message && (
-        <div className={`mt-4 p-3 rounded ${
-          message.toLowerCase().includes('fail') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-        }`}>
-          {message}
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Processing...' : editingId ? 'Update' : 'Save'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {message && (
+          <div className={`mt-4 p-3 rounded ${
+            message.toLowerCase().includes('fail') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        {/* Configuration Table */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-3">Existing Configurations</h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="py-2 px-4 border-b">Config ID</th>
+                  <th className="py-2 px-4 border-b">Max Slots</th>
+                  <th className="py-2 px-4 border-b">Location</th>
+                  <th className="py-2 px-4 border-b">Department</th>
+                  <th className="py-2 px-4 border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {configData.length > 0 ? (
+                  configData.map((item) => (
+                    <tr key={item.config_id} className="hover:bg-gray-50">
+                      <td className="py-2 px-4 border-b text-center">{item.config_id}</td>
+                      <td className="py-2 px-4 border-b text-center">{item.max_slots}</td>
+                      <td className="py-2 px-4 border-b text-center">{item.location}</td>
+                      <td className="py-2 px-4 border-b text-center">{item.department}</td>
+                      <td className="py-2 px-4 border-b text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="p-1 text-blue-600 hover:text-blue-800"
+                            title="Edit"
+                          >
+                            <PencilIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.config_id)}
+                            className="p-1 text-red-600 hover:text-red-800"
+                            title="Delete"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-4 text-center text-gray-500">
+                      No configuration data available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      )}
+      </div>
     </div>
-    </div>
-    
   );
 };
 
