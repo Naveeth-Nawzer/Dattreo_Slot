@@ -44,6 +44,7 @@ const BookingAppointment = () => {
   const [success, setSuccess] = useState(false);
   const [configLoading, setConfigLoading] = useState(true);
   const [availableLocations, setAvailableLocations] = useState([]);
+  const [availableDepartments, setAvailableDepartments] = useState([]);
   const [qrCodeData, setQrCodeData] = useState(null);
   const [bookingInfo, setBookingInfo] = useState(null);
   const qrCodeRef = useRef(null);
@@ -57,22 +58,27 @@ const BookingAppointment = () => {
   }, []);
 
   const fetchConfig = useCallback(async () => {
-    try {
-      setConfigLoading(true);
-      const res = await api.get('/slots/config');
-      if (res.data?.success) {
-        const loc = res.data.location || '';
-        setAvailableLocations(loc ? [loc] : []);
-        if (loc) {
-          setFormData(prev => ({ ...prev, location: loc }));
-        }
-      }
-    } catch (err) {
-      console.error('Config fetch error:', err);
-    } finally {
-      setConfigLoading(false);
+  try {
+    setConfigLoading(true);
+    const configRes = await api.get('/slots/config');
+
+    if (configRes.data?.success) {
+      // Process location
+      const location = configRes.data.location || 'Main Office';
+      setAvailableLocations([location]);
+      setFormData(prev => ({ ...prev, location }));
+
+      // Process department - assuming it's a single department string
+      const department = configRes.data.department || 'General';
+      setAvailableDepartments([{ id: 1, name: department }]);
+      setFormData(prev => ({ ...prev, department }));
     }
-  }, []);
+  } catch (err) {
+    console.error('Config fetch error:', err);
+  } finally {
+    setConfigLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchConfig();
@@ -122,91 +128,6 @@ const BookingAppointment = () => {
     return true;
   }, [formData, slotId]);
 
-  // const handleSubmit = useCallback(async (e) => {
-  //   e.preventDefault();
-    
-  //   // Validate form before submission
-  //   if (!validateForm()) {
-  //     return;
-  //   }
-    
-  //   setLoading(true);
-  //   setError(null);
-  
-  //   try {
-  //     // 1. Prepare the payload with exact field names expected by backend
-  //     const bookingPayload = {
-  //       name: formData.name.trim(),
-  //       NIC: formData.nic.trim(),  // Using uppercase NIC to match backend
-  //       number: formData.number.trim(),
-  //       hospital: formData.hospital.trim(),
-  //       department: formData.department.trim(),
-  //       location: formData.location || 'Main Office', // Default if empty
-  //       date: formData.date,
-  //       time: formData.time,
-  //       slot_id: parseInt(slotId)  // Ensure slotId is a number
-  //     };
-  
-  //     console.log('Submitting booking payload:', bookingPayload);
-  
-  //     // 2. First create the patient booking
-  //     const bookingResponse = await api.post("/bookings", bookingPayload);
-      
-  //     if (!bookingResponse.data?.patient?.id) {
-  //       throw new Error("Patient booking failed - no ID returned");
-  //     }
-  
-  //     const userId = bookingResponse.data.patient.id;
-  
-  //     // 3. Then book the slot with the patient ID
-  //     const slotResponse = await api.post(`/slots/${slotId}/book`, {
-  //       user_id: userId,
-  //       location: bookingPayload.location
-  //     });
-  
-  //     // 4. Handle successful booking
-  //     setSuccess(true);
-  //     setBookingInfo({
-  //       patient: bookingResponse.data.patient,
-  //       slot: slotResponse.data.slot
-  //     });
-      
-  //     setQrCodeData({
-  //       bookingId: userId,
-  //       slotId: slotId,
-  //       patientName: formData.name,
-  //       dateTime: `${formData.date} ${formData.time}`,
-  //       location: formData.location
-  //     });
-  
-  //   } catch (err) {
-  //     console.error("Booking error details:", {
-  //       error: err,
-  //       response: err.response?.data,
-  //       config: err.config
-  //     });
-  
-  //     let errorMessage = "Booking failed. Please try again.";
-      
-  //     if (err.response) {
-  //       // Handle backend validation errors
-  //       if (err.response.status === 400) {
-  //         errorMessage = err.response.data?.error || 
-  //                       err.response.data?.message || 
-  //                       "Invalid data submitted";
-  //       } else if (err.response.status === 409) {
-  //         errorMessage = "This slot is no longer available";
-  //       }
-  //     } else if (err.request) {
-  //       errorMessage = "No response from server. Please check your connection.";
-  //     }
-  
-  //     setError(errorMessage);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [formData, slotId, validateForm]);
-
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
   
@@ -254,7 +175,7 @@ const BookingAppointment = () => {
         slot: slotResponse.data.slot
       });
   
-      // ✅ 5. Generate QR code data in backend-expected format
+      // 5. Generate QR code data in backend-expected format
       setQrCodeData({
         slotId: parseInt(slotId, 10),
         patientId: parseInt(patientId, 10)
@@ -285,9 +206,6 @@ const BookingAppointment = () => {
       setLoading(false);
     }
   }, [formData, slotId, validateForm]);
-  
-  
-
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center p-6">
@@ -357,15 +275,22 @@ const BookingAppointment = () => {
           required
         />
         
-        <input 
-          type="text" 
+        <select
           name="department"
-          placeholder="Department" 
           value={formData.department}
           onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
           required
-        />
+          disabled={configLoading}
+        >
+          {configLoading ? (
+            <option value="">Loading...</option>
+          ) : (
+            availableDepartments.map((dept) => (
+              <option key={dept.id} value={dept.name}>{dept.name}</option>
+            ))
+          )}
+        </select>
         
         <select
           name="location"
@@ -373,16 +298,15 @@ const BookingAppointment = () => {
           onChange={handleChange}
           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
           required
-          disabled={configLoading || (availableLocations.length === 1)}
+          disabled={configLoading || availableLocations.length === 0}
         >
-          <option value="">Select Location</option>
-          {availableLocations.map((loc) => (
-            <option key={loc} value={loc}>{loc}</option>
-          ))}
-          {availableLocations.length === 0 && (
+          {availableLocations.length === 0 ? (
+            <option value="">Loading locations...</option>
+          ) : (
             <>
-              <option value="Main Building">Main Building</option>
-              <option value="Emergency Wing">Emergency Wing</option>
+              {availableLocations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
             </>
           )}
         </select>
@@ -411,10 +335,10 @@ const BookingAppointment = () => {
 
         <button 
           type="submit" 
-          disabled={loading}
-          className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold`}
+          disabled={loading || configLoading}
+          className={`w-full ${loading || configLoading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold`}
         >
-          {loading ? 'Booking...' : 'Book Now'}
+          {loading ? 'Booking...' : configLoading ? 'Loading...' : 'Book Now'}
         </button>
       </form>
 
@@ -428,14 +352,12 @@ const BookingAppointment = () => {
               className="p-4 bg-white rounded-lg border border-gray-300 mb-4"
               ref={qrCodeRef}
             >
-            <QRCodeCanvas
-  value={JSON.stringify(qrCodeData)}
-  size={200}
-  level="H"
-  includeMargin
-/>
-
-
+              <QRCodeCanvas
+                value={JSON.stringify(qrCodeData)}
+                size={200}
+                level="H"
+                includeMargin
+              />
             </div>
             
             <div className="w-full space-y-2 mb-4">
