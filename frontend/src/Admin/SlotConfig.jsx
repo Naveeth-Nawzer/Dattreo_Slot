@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import { useLocation, useNavigate } from "react-router-dom";
+import PageNavigator from "../Components/PageNavigator"
 
 const SlotConfig = () => {
+  const routesOrder = [
+    "/OnboardingPage2",
+    "/OnboardingPage",
+    "/LanguageSelection",
+    "/Firstvist",
+    "/Register",
+    "/SignIn",
+    "/home",
+    "/BookingAppointment",
+    "/MyAppointment", 
+    "/",
+    "/profile",
+    "/Finder",         
+    "/SlotConfig" ];
+
   const [config, setConfig] = useState({
     max_slots: 20,
     location: 'Main Office',
@@ -11,6 +30,7 @@ const SlotConfig = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [departmentSuggestions, setDepartmentSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
 
   // Fetch current config on component mount
   useEffect(() => {
@@ -131,8 +151,14 @@ const SlotConfig = () => {
   );
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Slot Configuration</h2>
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
+      
+      <div className="w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md mt-[200px] sm:mt-[170px]">
+      <TealWaveBackground/>
+      <BrushTealWaves/>
+
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 text-center">Slot Configuration</h2>
       
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -198,7 +224,7 @@ const SlotConfig = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="mt-5 bg-teal-500 text-white w-full border border-teal-300 text-teal-800 font-medium rounded-xl py-3 hover:bg-teal-600 transition-colors"
           disabled={isLoading}
         >
           {isLoading ? 'Saving...' : 'Save Configuration'}
@@ -213,6 +239,8 @@ const SlotConfig = () => {
         </div>
       )}
     </div>
+    </div>
+    
   );
 };
 

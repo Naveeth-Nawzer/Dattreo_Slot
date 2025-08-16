@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import qrImage from "../assets/QR.jpeg";
 import profileimg from "../assets/Profile.jpeg";
 import Records from "../assets/Records.jpeg";
+import { useNavigate } from 'react-router-dom';
+import PageNavigator from "../Components/PageNavigator"
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from "../Components/BrushTealWaves";
+
 
 const MedicalRecordsStack = () => {
   return (
     <div className="relative w-[300px] h-[300px] mt-12">
-      {[...Array(8)].map((_, i) => (
+      {/* {[...Array(8)].map((_, i) => (
         <img
           key={i}
           src={Records}
@@ -22,64 +27,159 @@ const MedicalRecordsStack = () => {
             transition: "transform 0.3s ease",
           }}
         />
-      ))}
-      <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
+      ))} */}
+      {/* <div className="absolute -bottom-10 left-0 w-full text-center text-3xl font-medium text-gray-700">
         Medical Records
-      </div>
+      </div> */}
     </div>
   );
 };
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({
-    name: "Henry Cavil",
-    nic: "200123400987",
-    mobile: "0745635422",
-    gmail: "cavil12Hgmail.com",
+    name: "",
+    nic: "",
+    emailOrMobile: "",
     editing: false,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const routesOrder = [
+    "/home",
+    "/profile",
+    "/home",
+   ];
+
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+  try {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (!userData?.nic) {
+      throw new Error("No user data found");
+    }
+
+    const response = await fetch(`http://localhost:5001/UserOperation/profile/${userData.nic}`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch profile");
+    }
+
+    const data = await response.json();
+    
+    setProfile({
+      name: data.user.name || "",
+      nic: data.user.nic || "",
+      emailOrMobile: data.user.emailOrMobile || "",
+      editing: false
+    });
+
+  } catch (err) {
+    console.error("Profile fetch error:", err);
+    setError(err.message);
+  }
+};
+
+    fetchProfile();
+  }, [navigate]);
 
   const handleEdit = () => setProfile({ ...profile, editing: true });
-  const handleSave = () => setProfile({ ...profile, editing: false });
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
+  const handleSave = async () => {
+    try {
+      // Update in backend
+      const response = await fetch('http://localhost:5001/UserOperation/updateProfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nic: profile.nic,
+          name: profile.name,
+          emailOrMobile: profile.emailOrMobile,
+        })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error('Profile update failed');
+      }
+
+      // Update in localStorage
+      const updatedUser = {
+        ...JSON.parse(localStorage.getItem('userData')),
+        name: profile.name,
+        emailOrMobile: profile.emailOrMobile,
+      };
+      localStorage.setItem('userData', JSON.stringify(updatedUser));
+      
+      setProfile({ ...profile, editing: false });
+      
+    } catch (error) {
+      console.error('Update error:', error);
+      // Handle error (show message to user)
+    }
+  };
+
+  
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button 
+          onClick={() => navigate('/signin')}
+          className="bg-teal-600 text-white px-4 py-2 rounded"
+        >
+          Go to Login
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full mx-auto font-sans bg-[#f9fcfc] px-8 py-12 flex flex-col lg:flex-row justify-center gap-12 box-border overflow-y-auto">
+    <div className="bg-white">
+      <PageNavigator routesOrder={routesOrder}/>
+      <TealWaveBackground/>
+      <BrushTealWaves/>
+    <div className="w-full mx-auto font-sans  px-6 py-12 flex flex-col md:flex-row justify-center gap-12 box-border overflow-y-auto">
       {/* Left Section */}
-      <div className="flex-1 max-w-2xl flex flex-col items-center lg:items-start px-4">
-        <div className="text-center lg:text-left mb-12">
-          <h1 className="text-6xl md:text-8xl font-bold leading-tight">
+      <div className="flex-1 max-w-md flex flex-col items-center md:items-start px-4  rounded-3xl">
+        <div className="text-center lg:text-left mb-16">
+          <h1 className="text-3xl md:text-4xl font-bold leading-tight">
             <span className="text-[#4CDBB9] block">My</span>
             <span className="block">Profile</span>
           </h1>
-          <small className="text-xl md:text-2xl text-gray-600">View your profile</small>
+          <small className="text-lg md:text-lg text-gray-400">View your profile</small>
         </div>
 
         {/* QR Code */}
-        <div className="mb-12 lg:mb-24 w-full flex justify-center lg:justify-start">
+        <div className="mb-12 lg:mb-24 w-full flex justify-center md:justify-center">
           <img
             src={qrImage}
             alt="QR Code"
-            className="w-64 h-64 md:w-80 md:h-80 object-contain"
+            className="w-40 h-40 md:w-30 md:h-30 object-contain"
           />
         </div>
 
         {/* Medical Records Stack */}
-        <div className="w-full flex justify-center lg:justify-start">
+        {/* <div className="w-full flex justify-center lg:justify-start">
           <MedicalRecordsStack />
-        </div>
+        </div> */}
       </div>
 
       {/* Right Section */}
-      <div className="flex-1 max-w-2xl bg-[#f6fafa] rounded-3xl p-8 md:p-16 shadow-lg flex flex-col items-center">
+      <div className="flex-1 max-w-xl bg-[#f6fafa] rounded-3xl p-2 md:p-4 shadow-lg flex flex-col items-center">
         <div className="w-full flex justify-center mb-12">
           <img
             src={profileimg}
             alt="Profile"
-            className="w-64 h-64 md:w-80 md:h-80 object-cover rounded-full border-4 border-[#0A8F70]"
+            className="w-40 h-40 md:w-40 md:h-40 object-cover rounded-full border-4 border-[#0A8F70]"
           />
         </div>
 
@@ -88,14 +188,13 @@ const Profile = () => {
           {[
             { label: "Name", name: "name", type: "text" },
             { label: "NIC", name: "nic", type: "text" },
-            { label: "Mobile number", name: "mobile", type: "text" },
-            { label: "Gmail", name: "gmail", type: "email" },
+            { label: "Mobile number or Email", name: "emailOrMobile", type: "text" },
           ].map(({ label, name, type }) => (
             <div
               key={name}
-              className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#0A8F70] py-4 text-[#4a8c7e]"
+              className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#0A8F70] py-2 text-[#4a8c7e]"
             >
-              <label className="bg-gradient-to-r from-[#032920] to-[#0A8F70] bg-clip-text text-transparent font-semibold text-lg md:text-xl mb-2 sm:mb-0">
+              <label className="bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent font-medium text-md md:text-lg mb-2 sm:mb-0">
                 {label}
               </label>
 
@@ -105,7 +204,7 @@ const Profile = () => {
                   name={name}
                   value={profile[name]}
                   onChange={handleChange}
-                  className="bg-transparent outline-none border-none text-right w-full sm:w-3/5 font-semibold text-[#0A8F70] text-lg md:text-xl"
+                  className="bg-transparent outline-none border-none text-right w-full sm:w-3/5 font-semibold text-[#0A8F70] text-md md:text-lg"
                 />
               ) : (
                 <span className="text-lg md:text-xl text-gray-700">{profile[name]}</span>
@@ -137,6 +236,7 @@ const Profile = () => {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };

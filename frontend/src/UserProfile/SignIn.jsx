@@ -66,8 +66,8 @@ export default function FirstVisitForm() {
         ...data.user // assuming the API returns additional user data
       }));
     
-    // Handle successful registration (redirect, show success message, etc.)
-    // Example:
+    localStorage.setItem('userData', JSON.stringify(data.user));
+    
     navigate('/home'); // If using react-router
     // Or show success state
     
@@ -95,19 +95,19 @@ export default function FirstVisitForm() {
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center px-4 py-8">
       <TealWaveBackground/>
       <BrushTealWaves/>
 
       {/* Main card container */}
-      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex max-w-4xl w-full overflow-hidden mt-[70px]">
+      <div className="relative bg-[#F7FBFB] rounded-3xl shadow-lg flex flex-col md:flex-row max-w-4xl w-full overflow-hidden mt-10">
         {/* Left side form */}
-        <div className="p-12 flex flex-col text-end flex-1 max-w-md">
-          <h2 className="text-3xl font-medium text-gray-900 mb-8">
+        <div className="p-6 sm:p-9 md:p-12 flex flex-col flex-1">
+          <h2 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-6 sm:mb-8">
             Continue with <br /><span className="text-[#0A8F70] font-bold">pass code</span>
           </h2>
 
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-6 sm:gap-6" onSubmit={handleSubmit}>
             <label className="block text-sm font-normal text-gray-700 relative text-start">
               NIC Number
               <input
@@ -162,11 +162,11 @@ export default function FirstVisitForm() {
         </div>
 
         {/* Right side*/}
-        <div className="flex items-center justify-center relative flex-1">
+        <div className="flex items-center justify-center relative flex-1 p-4 sm:p-6">
           <img 
             src={register}
             alt="register_img"
-            className="w-[300px] h-[400px] mr-[30px]"
+            className="w-full max-w-[250px] sm:max-w-[300px] md:max-w-[350px] h-auto object-contain"
           />
         </div>
       </div>

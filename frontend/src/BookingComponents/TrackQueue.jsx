@@ -5,6 +5,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import Nav from '../Components/Nav';
+import TealWaveBackground from "../Components/TealWaveBackground";
+import BrushTealWaves from '../Components/BrushTealWaves'
+import PageNavigator from "../Components/PageNavigator"
 
 // Constants
 const BACKEND_URL = 'http://localhost:5001/api';
@@ -36,6 +39,13 @@ const TrackQueue = ({ userId }) => {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const optimisticAppliedRef = useRef(false);
+
+
+  const routesOrder = [
+    "/home", 
+    "/TrackQueue",
+    "/home",
+   ];
 
   const fetchQueue = useCallback(async (signal) => {
     try {
@@ -222,9 +232,13 @@ const TrackQueue = ({ userId }) => {
   }
 
   return (
+    <div>
+      <PageNavigator routesOrder={routesOrder}/>
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Nav showLanguageSelector={true} />
       
+      <TealWaveBackground/>
+      <BrushTealWaves/>
       <main className="flex-1 py-10 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="bg-white rounded-xl shadow-md p-6 mb-10">
@@ -360,6 +374,7 @@ const TrackQueue = ({ userId }) => {
           </div>
         </div>
       </main>
+    </div>
     </div>
   );
 };
