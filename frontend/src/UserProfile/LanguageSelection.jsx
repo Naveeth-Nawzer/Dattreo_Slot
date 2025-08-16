@@ -10,13 +10,13 @@ export default function LanguageSelection() {
 
   const languages = [
     { code: "en", label: "English" },
-    { code: "ta", label: "Tamil" },
-    { code: "si", label: "Sinhala" },
+    { code: "ta", label: "தமிழ்" },
+    { code: "si", label: "සිංහල" },
   ];
 
   const handleLanguageSelect = (code) => {
     i18n.changeLanguage(code); // Change the language globally
-    navigate('/home'); // Redirect to home page after selection
+    navigate('/Firstvist'); // Redirect to home page after selection
   };
 
   return (

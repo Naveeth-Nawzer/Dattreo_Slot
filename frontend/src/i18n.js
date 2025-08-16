@@ -46,6 +46,10 @@ const resources = {
       apiError: {
         title: "API Error",
         loadQueueFailed: "Failed to load queue data"
+      },
+      firstVisit: {
+        bookVisit: "Book your first visit",
+        continueWithPasscode: "Continue with pass code"
       }
     }
   },
@@ -85,6 +89,10 @@ const resources = {
       apiError: {
         title: "API பிழை",
         loadQueueFailed: "வரிசை தரவை ஏற்ற முடியவில்லை"
+      },
+      firstVisit: {
+        bookVisit: "உங்கள் முதல் வருகையை பதிவு செய்யவும்",
+        continueWithPasscode: "கடவுச்சொல்லுடன் தொடரவும்"
       }
     }
   },
@@ -124,6 +132,10 @@ const resources = {
       apiError: {
         title: "API දෝෂය",
         loadQueueFailed: "පෝලිමේ දත්ත ලබා ගැනීමට අසමත් විය"
+      },
+      firstVisit: {
+        bookVisit: "ඔබේ පළමු ගමන වෙන්කරගන්න",
+        continueWithPasscode: "මුරපදය සමඟ ඉදිරියට යන්න"
       }
     }
   }
