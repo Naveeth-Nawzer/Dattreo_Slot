@@ -1,0 +1,20 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy manifests first
+COPY package*.json ./
+
+# Make sure devDependencies are installed (for Vite)
+# If your CI/host sets NODE_ENV=production by default, explicitly allow dev deps:
+ENV NODE_ENV=development
+RUN npm ci
+
+# Verify vite is present (fail fast if not)
+RUN npx vite --version
+
+# Copy source
+COPY . .
+
+EXPOSE 5173
+CMD ["npm","run","dev","--","--host","0.0.0.0"]
