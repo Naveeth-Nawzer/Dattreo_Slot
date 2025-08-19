@@ -19,4 +19,11 @@ Make sure you have installed:
 
 ---
 
+Admin Credential
+
+- ADMIN_NIC=        5
+- ADMIN_PASSCODE=   123456
+
+---
+
 
