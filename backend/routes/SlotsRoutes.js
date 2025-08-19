@@ -41,8 +41,7 @@ const slotsController = require('../Controllers/SlotsController');
 // Configuration routes
 router.route('/config')
   .get(slotsController.getConfig)
-  .put(slotsController.updateConfig)
-  .post(slotsController.createConfig);
+  .put(slotsController.updateConfig);
 
   router.get('/departments',slotsController.getDepartments)
   router.get('/slots/qrcode', slotsController.getQRCode);

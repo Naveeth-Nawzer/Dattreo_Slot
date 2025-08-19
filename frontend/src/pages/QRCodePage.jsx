@@ -85,7 +85,7 @@ const QRCodePage = () => {
     <div>
       <PageNavigator routesOrder={routesOrder}/>
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Nav showLanguageSelector={true} />
+      <Navbar showLanguageSelector={true} />
       
       <TealWaveBackground/>
       <BrushTealWaves/>

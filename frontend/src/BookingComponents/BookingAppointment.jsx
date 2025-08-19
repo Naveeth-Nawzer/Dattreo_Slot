@@ -3,6 +3,9 @@
 // import { useNavigate, useLocation } from "react-router-dom";
 // import { QRCodeCanvas } from 'qrcode.react';
 // import PropTypes from 'prop-types';
+// import TealWaveBackground from "../Components/TealWaveBackground";
+// import BrushTealWaves from '../Components/BrushTealWaves'
+// import PageNavigator from "../Components/PageNavigator"
 
 // // Configure axios instance
 // const api = axios.create({
@@ -27,6 +30,11 @@
 //   const locationHook = useLocation();
 //   const params = new URLSearchParams(locationHook.search);
 //   const slotId = params.get('slotId');
+
+//   const routesOrder = [
+//     "/home",
+//     "/BookingAppointment",
+//    ];
   
 //   const [formData, setFormData] = useState({
 //     name: "",
@@ -44,9 +52,11 @@
 //   const [success, setSuccess] = useState(false);
 //   const [configLoading, setConfigLoading] = useState(true);
 //   const [availableLocations, setAvailableLocations] = useState([]);
+//   const [availableDepartments, setAvailableDepartments] = useState([]);
 //   const [qrCodeData, setQrCodeData] = useState(null);
 //   const [bookingInfo, setBookingInfo] = useState(null);
 //   const qrCodeRef = useRef(null);
+//   const qrCodeSectionRef = useRef(null);
 
 //   const handleChange = useCallback((e) => {
 //     const { name, value } = e.target;
@@ -57,26 +67,45 @@
 //   }, []);
 
 //   const fetchConfig = useCallback(async () => {
-//     try {
-//       setConfigLoading(true);
-//       const res = await api.get('/slots/config');
-//       if (res.data?.success) {
-//         const loc = res.data.location || '';
-//         setAvailableLocations(loc ? [loc] : []);
-//         if (loc) {
-//           setFormData(prev => ({ ...prev, location: loc }));
-//         }
-//       }
-//     } catch (err) {
-//       console.error('Config fetch error:', err);
-//     } finally {
-//       setConfigLoading(false);
+//   try {
+//     setConfigLoading(true);
+//     const configRes = await api.get('/slots/config');
+
+//     if (configRes.data?.success) {
+//       // Process location
+//       const location = configRes.data.location || 'Main Office';
+//       setAvailableLocations([location]);
+//       setFormData(prev => ({ ...prev, location }));
+
+//       // Process department - assuming it's a single department string
+//       const department = configRes.data.department || 'General';
+//       setAvailableDepartments([{ id: 1, name: department }]);
+//       setFormData(prev => ({ ...prev, department }));
 //     }
-//   }, []);
+//   } catch (err) {
+//     console.error('Config fetch error:', err);
+//   } finally {
+//     setConfigLoading(false);
+//   }
+// }, []);
 
 //   useEffect(() => {
 //     fetchConfig();
 //   }, [fetchConfig]);
+
+
+//   useEffect(() => {
+//   if (success && qrCodeSectionRef.current) {
+//     const timer = setTimeout(() => {
+//       qrCodeSectionRef.current.scrollIntoView({ 
+//         behavior: 'smooth',
+//         block: 'center'
+//       });
+//     }, 300); // 300ms delay
+    
+//     return () => clearTimeout(timer);
+//   }
+// }, [success]);
 
 //   const downloadQRCode = useCallback(() => {
 //     if (!qrCodeRef.current) return;
@@ -124,75 +153,64 @@
 
 //   const handleSubmit = useCallback(async (e) => {
 //     e.preventDefault();
-    
+  
 //     // Validate form before submission
 //     if (!validateForm()) {
 //       return;
 //     }
-    
+  
 //     setLoading(true);
 //     setError(null);
   
 //     try {
-//       // 1. Prepare the payload with exact field names expected by backend
+//       // 1. Prepare payload matching backend expectations
 //       const bookingPayload = {
 //         name: formData.name.trim(),
-//         NIC: formData.nic.trim(),  // Using uppercase NIC to match backend
+//         NIC: formData.nic.trim(),  // backend expects uppercase NIC
 //         number: formData.number.trim(),
 //         hospital: formData.hospital.trim(),
 //         department: formData.department.trim(),
-//         location: formData.location || 'Main Office', // Default if empty
+//         location: formData.location || 'Main Office',
 //         date: formData.date,
 //         time: formData.time,
-//         slot_id: parseInt(slotId)  // Ensure slotId is a number
+//         slot_id: parseInt(slotId, 10) // ensure number
 //       };
   
 //       console.log('Submitting booking payload:', bookingPayload);
   
-//       // 2. First create the patient booking
+//       // 2. Create the patient booking
 //       const bookingResponse = await api.post("/bookings", bookingPayload);
-      
 //       if (!bookingResponse.data?.patient?.id) {
 //         throw new Error("Patient booking failed - no ID returned");
 //       }
+//       const patientId = bookingResponse.data.patient.id;
   
+//       // 3. Book the slot
 //       const userId = bookingResponse.data.patient.id;
-  
-//       // 3. Then book the slot with the patient ID
 //       const slotResponse = await api.post(`/slots/${slotId}/book`, {
-//         user_id: userId,
+//         user_id: patientId,
 //         location: bookingPayload.location
 //       });
   
-//       // 4. Handle successful booking
+//       // 4. Handle success
 //       setSuccess(true);
 //       setBookingInfo({
 //         patient: bookingResponse.data.patient,
 //         slot: slotResponse.data.slot
 //       });
-      
+  
+//       // 5. Generate QR code data in backend-expected format
 //       setQrCodeData({
-//         bookingId: userId,
-//         slotId: slotId,
-//         patientName: formData.name,
-//         dateTime: `${formData.date} ${formData.time}`,
-//         location: formData.location
+//         slotId: parseInt(slotId, 10),
+//         patientId: parseInt(patientId, 10)
 //       });
   
 //     } catch (err) {
-//       console.error("Booking error details:", {
-//         error: err,
-//         response: err.response?.data,
-//         config: err.config
-//       });
-  
 //       let errorMessage = "Booking failed. Please try again.";
-      
 //       if (err.response) {
-//         // Handle backend validation errors
 //         if (err.response.status === 400) {
-//           errorMessage = err.response.data?.error || 
-//                         err.response.data?.message || 
+//           errorMessage = err.response.data?.error ||
+//                         err.response.data?.message ||
 //                         "Invalid data submitted";
 //         } else if (err.response.status === 409) {
 //           errorMessage = "This slot is no longer available";
@@ -206,28 +224,30 @@
 //       setLoading(false);
 //     }
 //   }, [formData, slotId, validateForm]);
+
 //   return (
-//     <div className="bg-white flex flex-col items-center p-6">
+//     <div>
+//       <PageNavigator routesOrder={routesOrder}/>
+//     <div className="bg-white flex flex-col items-center p-4 sm:p-6 mt-[10px] sm:mt-[60px] rounded-lg">
+//       <TealWaveBackground/>
+//       <BrushTealWaves/>
 //       {/* Heading */}
 //       <div className="w-full max-w-xl">
-//         <h1 className="text-5xl font-bold text-teal-500">Booking</h1>
-//         <h2 className="text-4xl font-bold text-black mt-1">Appointment</h2>
-//         <p className="mt-1 text-gray-400">Book slot with date & time</p>
-//         {/* <hr className="my-6" /> */}
+//         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-teal-500">Booking</h1>
+//         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mt-1">Appointment</h2>
+//         <p className="mt-1 text-gray-400 text-sm sm:text-base">Book slot with date & time</p>
 //       </div>
 
 //       {/* Form */}
-//       <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-4 mt-8">
-//         {/* <h3 className="text-center text-teal-500 text-lg font-semibold mb-6">Booking Form</h3> */}
-
+//       <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-3 sm:space-y-4 mt-6 sm:mt-8">
 //         {error && (
-//           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+//           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm sm:text-base">
 //             {error}
 //           </div>
 //         )}
 
 //         {success && (
-//           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+//           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-sm sm:text-base">
 //             Appointment booked successfully!
 //           </div>
 //         )}
@@ -238,7 +258,7 @@
 //           placeholder="Name" 
 //           value={formData.name}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //           required
 //         />
         
@@ -248,7 +268,7 @@
 //           placeholder="NIC" 
 //           value={formData.nic}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //           required
 //           minLength={MIN_NIC_LENGTH}
 //         />
@@ -259,7 +279,7 @@
 //           placeholder="Mobile Number" 
 //           value={formData.number}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //           required
 //           minLength={MIN_PHONE_LENGTH}
 //         />
@@ -270,47 +290,53 @@
 //           placeholder="Hospital" 
 //           value={formData.hospital}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //           required
 //         />
         
-//         <input 
-//           type="text" 
+//         <select
 //           name="department"
-//           placeholder="Department" 
 //           value={formData.department}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //           required
-//         />
+//           disabled={configLoading}
+//         >
+//           {configLoading ? (
+//             <option value="">Loading...</option>
+//           ) : (
+//             availableDepartments.map((dept) => (
+//               <option key={dept.id} value={dept.name}>{dept.name}</option>
+//             ))
+//           )}
+//         </select>
         
 //         <select
 //           name="location"
 //           value={formData.location}
 //           onChange={handleChange}
-//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+//           className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base"
 //           required
-//           disabled={configLoading || (availableLocations.length === 1)}
+//           disabled={configLoading || availableLocations.length === 0}
 //         >
-//           <option value="">Select Location</option>
-//           {availableLocations.map((loc) => (
-//             <option key={loc} value={loc}>{loc}</option>
-//           ))}
-//           {availableLocations.length === 0 && (
+//           {availableLocations.length === 0 ? (
+//             <option value="">Loading locations...</option>
+//           ) : (
 //             <>
-//               <option value="Main Building">Main Building</option>
-//               <option value="Emergency Wing">Emergency Wing</option>
+//               {availableLocations.map((loc) => (
+//                 <option key={loc} value={loc}>{loc}</option>
+//               ))}
 //             </>
 //           )}
 //         </select>
 
-//         <div className="grid grid-cols-2 gap-4">
+//         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 //           <input 
 //             type="date" 
 //             name="date"
 //             value={formData.date}
 //             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //             required
 //             min={new Date().toISOString().split('T')[0]}
 //           />
@@ -319,7 +345,7 @@
 //             name="time"
 //             value={formData.time}
 //             onChange={handleChange}
-//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500" 
+//             className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
 //             required
 //             min={WORKING_HOURS.start}
 //             max={WORKING_HOURS.end}
@@ -329,31 +355,32 @@
 //         <button 
 //           type="submit" 
 //           disabled={loading}
-//           className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold`}
+//           className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold text-sm sm:text-base`}
 //         >
-//           {loading ? 'Booking...' : 'Book Now'}
+//           {loading ? 'Booking...' : configLoading ? 'Loading...' : 'Book Now'}
 //         </button>
 //       </form>
 
 //       {/* QR Code Display */}
 //       {success && qrCodeData && bookingInfo && (
-//         <div className="w-full max-w-lg mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-//           <h3 className="text-xl font-semibold text-center mb-4">Your Booking QR Code</h3>
+//         <div ref={qrCodeSectionRef}
+//         className="w-full max-w-lg mt-6 sm:mt-8 p-4 sm:p-6 bg-gray-50 rounded-lg border border-gray-200">
+//           <h3 className="text-lg sm:text-xl font-semibold text-center mb-3 sm:mb-4">Your Booking QR Code</h3>
           
 //           <div className="flex flex-col items-center">
 //             <div 
-//               className="p-4 bg-white rounded-lg border border-gray-300 mb-4"
+//               className="p-3 sm:p-4 bg-white rounded-lg border border-gray-300 mb-3 sm:mb-4"
 //               ref={qrCodeRef}
 //             >
-//               <QRCodeCanvas 
+//               <QRCodeCanvas
 //                 value={JSON.stringify(qrCodeData)}
-//                 size={200}
+//                 size={window.innerWidth < 640 ? 160 : 200}
 //                 level="H"
-//                 includeMargin={true}
+//                 includeMargin
 //               />
 //             </div>
             
-//             <div className="w-full space-y-2 mb-4">
+//             <div className="w-full space-y-1 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm">
 //               <p><strong>Booking ID:</strong> {bookingInfo.patient.id}</p>
 //               <p><strong>Patient:</strong> {bookingInfo.patient.name}</p>
 //               <p><strong>NIC:</strong> {bookingInfo.patient.nic}</p>
@@ -363,16 +390,16 @@
 //               <p><strong>Location:</strong> {bookingInfo.slot.location}</p>
 //             </div>
 
-//             <div className="flex gap-4">
+//             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
 //               <button 
 //                 onClick={downloadQRCode}
-//                 className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold"
+//                 className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
 //               >
 //                 Download QR Code
 //               </button>
 //               <button 
-//                 onClick={() => navigate(`/track-booking?bookingId=${bookingInfo.patient.id}`)}
-//                 className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-6 rounded-lg font-semibold"
+//                 onClick={() => navigate(`/queue`)}
+//                 className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
 //               >
 //                 Track Booking
 //               </button>
@@ -381,23 +408,21 @@
 //         </div>
 //       )}
 //     </div>
+//     </div>
 //   );
 // };
 
 // export default BookingAppointment;
 
 
-
-
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { QRCodeCanvas } from 'qrcode.react';
-import PropTypes from 'prop-types';
+import { useAuth } from "../AuthContext";
 import TealWaveBackground from "../Components/TealWaveBackground";
-import BrushTealWaves from '../Components/BrushTealWaves'
-import PageNavigator from "../Components/PageNavigator"
+import BrushTealWaves from '../Components/BrushTealWaves';
+import PageNavigator from "../Components/PageNavigator";
 
 // Configure axios instance
 const api = axios.create({
@@ -422,11 +447,12 @@ const BookingAppointment = () => {
   const locationHook = useLocation();
   const params = new URLSearchParams(locationHook.search);
   const slotId = params.get('slotId');
+  const { token } = useAuth();
 
   const routesOrder = [
     "/home",
     "/BookingAppointment",
-   ];
+  ];
   
   const [formData, setFormData] = useState({
     name: "",
@@ -450,6 +476,53 @@ const BookingAppointment = () => {
   const qrCodeRef = useRef(null);
   const qrCodeSectionRef = useRef(null);
 
+  useEffect(() => {
+    if (!token) {
+      navigate('/SignIn', { state: { from: locationHook } });
+      return;
+    }
+    
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    fetchConfig();
+  }, [token, navigate, locationHook]);
+
+  const fetchConfig = useCallback(async () => {
+    try {
+      setConfigLoading(true);
+      const configRes = await api.get('/slots/config');
+
+      if (configRes.data?.success) {
+        const location = configRes.data.location || 'Main Office';
+        setAvailableLocations([location]);
+        setFormData(prev => ({ ...prev, location }));
+
+        const department = configRes.data.department || 'General';
+        setAvailableDepartments([{ id: 1, name: department }]);
+        setFormData(prev => ({ ...prev, department }));
+      }
+    } catch (err) {
+      console.error('Config fetch error:', err);
+      if (err.response?.status === 401) {
+        navigate('/SignIn');
+      }
+    } finally {
+      setConfigLoading(false);
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (success && qrCodeSectionRef.current) {
+      const timer = setTimeout(() => {
+        qrCodeSectionRef.current.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -457,47 +530,6 @@ const BookingAppointment = () => {
       [name]: value
     }));
   }, []);
-
-  const fetchConfig = useCallback(async () => {
-  try {
-    setConfigLoading(true);
-    const configRes = await api.get('/slots/config');
-
-    if (configRes.data?.success) {
-      // Process location
-      const location = configRes.data.location || 'Main Office';
-      setAvailableLocations([location]);
-      setFormData(prev => ({ ...prev, location }));
-
-      // Process department - assuming it's a single department string
-      const department = configRes.data.department || 'General';
-      setAvailableDepartments([{ id: 1, name: department }]);
-      setFormData(prev => ({ ...prev, department }));
-    }
-  } catch (err) {
-    console.error('Config fetch error:', err);
-  } finally {
-    setConfigLoading(false);
-  }
-}, []);
-
-  useEffect(() => {
-    fetchConfig();
-  }, [fetchConfig]);
-
-
-  useEffect(() => {
-  if (success && qrCodeSectionRef.current) {
-    const timer = setTimeout(() => {
-      qrCodeSectionRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }, 300); // 300ms delay
-    
-    return () => clearTimeout(timer);
-  }
-}, [success]);
 
   const downloadQRCode = useCallback(() => {
     if (!qrCodeRef.current) return;
@@ -546,7 +578,11 @@ const BookingAppointment = () => {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
   
-    // Validate form before submission
+    if (!token) {
+      navigate('/SignIn');
+      return;
+    }
+
     if (!validateForm()) {
       return;
     }
@@ -555,43 +591,35 @@ const BookingAppointment = () => {
     setError(null);
   
     try {
-      // 1. Prepare payload matching backend expectations
       const bookingPayload = {
         name: formData.name.trim(),
-        NIC: formData.nic.trim(),  // backend expects uppercase NIC
+        NIC: formData.nic.trim(),
         number: formData.number.trim(),
         hospital: formData.hospital.trim(),
         department: formData.department.trim(),
         location: formData.location || 'Main Office',
         date: formData.date,
         time: formData.time,
-        slot_id: parseInt(slotId, 10) // ensure number
+        slot_id: parseInt(slotId, 10)
       };
   
-      console.log('Submitting booking payload:', bookingPayload);
-  
-      // 2. Create the patient booking
       const bookingResponse = await api.post("/bookings", bookingPayload);
       if (!bookingResponse.data?.patient?.id) {
         throw new Error("Patient booking failed - no ID returned");
       }
       const patientId = bookingResponse.data.patient.id;
   
-      // 3. Book the slot
-      const userId = bookingResponse.data.patient.id;
       const slotResponse = await api.post(`/slots/${slotId}/book`, {
         user_id: patientId,
         location: bookingPayload.location
       });
   
-      // 4. Handle success
       setSuccess(true);
       setBookingInfo({
         patient: bookingResponse.data.patient,
         slot: slotResponse.data.slot
       });
   
-      // 5. Generate QR code data in backend-expected format
       setQrCodeData({
         slotId: parseInt(slotId, 10),
         patientId: parseInt(patientId, 10)
@@ -604,6 +632,9 @@ const BookingAppointment = () => {
           errorMessage = err.response.data?.error ||
                         err.response.data?.message ||
                         "Invalid data submitted";
+        } else if (err.response.status === 401) {
+          navigate('/SignIn');
+          return;
         } else if (err.response.status === 409) {
           errorMessage = "This slot is no longer available";
         }
@@ -615,191 +646,188 @@ const BookingAppointment = () => {
     } finally {
       setLoading(false);
     }
-  }, [formData, slotId, validateForm]);
+  }, [formData, slotId, validateForm, token, navigate]);
 
   return (
     <div>
       <PageNavigator routesOrder={routesOrder}/>
-    <div className="bg-white flex flex-col items-center p-4 sm:p-6 mt-[10px] sm:mt-[60px] rounded-lg">
-      <TealWaveBackground/>
-      <BrushTealWaves/>
-      {/* Heading */}
-      <div className="w-full max-w-xl">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-teal-500">Booking</h1>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mt-1">Appointment</h2>
-        <p className="mt-1 text-gray-400 text-sm sm:text-base">Book slot with date & time</p>
-      </div>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-3 sm:space-y-4 mt-6 sm:mt-8">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm sm:text-base">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-sm sm:text-base">
-            Appointment booked successfully!
-          </div>
-        )}
-
-        <input 
-          type="text" 
-          name="name"
-          placeholder="Name" 
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-          required
-        />
-        
-        <input 
-          type="text" 
-          name="nic"
-          placeholder="NIC" 
-          value={formData.nic}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-          required
-          minLength={MIN_NIC_LENGTH}
-        />
-        
-        <input 
-          type="tel" 
-          name="number"
-          placeholder="Mobile Number" 
-          value={formData.number}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-          required
-          minLength={MIN_PHONE_LENGTH}
-        />
-        
-        <input 
-          type="text" 
-          name="hospital"
-          placeholder="Hospital" 
-          value={formData.hospital}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-          required
-        />
-        
-        <select
-          name="department"
-          value={formData.department}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-          required
-          disabled={configLoading}
-        >
-          {configLoading ? (
-            <option value="">Loading...</option>
-          ) : (
-            availableDepartments.map((dept) => (
-              <option key={dept.id} value={dept.name}>{dept.name}</option>
-            ))
-          )}
-        </select>
-        
-        <select
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base"
-          required
-          disabled={configLoading || availableLocations.length === 0}
-        >
-          {availableLocations.length === 0 ? (
-            <option value="">Loading locations...</option>
-          ) : (
-            <>
-              {availableLocations.map((loc) => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </>
-          )}
-        </select>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <input 
-            type="date" 
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-            required
-            min={new Date().toISOString().split('T')[0]}
-          />
-          <input 
-            type="time" 
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
-            required
-            min={WORKING_HOURS.start}
-            max={WORKING_HOURS.end}
-          />
+      <div className="bg-white flex flex-col items-center p-4 sm:p-6 mt-[10px] sm:mt-[60px] rounded-lg">
+        <TealWaveBackground/>
+        <BrushTealWaves/>
+        <div className="w-full max-w-xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-teal-500">Booking</h1>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mt-1">Appointment</h2>
+          <p className="mt-1 text-gray-400 text-sm sm:text-base">Book slot with date & time</p>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold text-sm sm:text-base`}
-        >
-          {loading ? 'Booking...' : configLoading ? 'Loading...' : 'Book Now'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-3 sm:space-y-4 mt-6 sm:mt-8">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm sm:text-base">
+              {error}
+            </div>
+          )}
 
-      {/* QR Code Display */}
-      {success && qrCodeData && bookingInfo && (
-        <div ref={qrCodeSectionRef}
-        className="w-full max-w-lg mt-6 sm:mt-8 p-4 sm:p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-lg sm:text-xl font-semibold text-center mb-3 sm:mb-4">Your Booking QR Code</h3>
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-sm sm:text-base">
+              Appointment booked successfully!
+            </div>
+          )}
+
+          <input 
+            type="text" 
+            name="name"
+            placeholder="Name" 
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+            required
+          />
           
-          <div className="flex flex-col items-center">
-            <div 
-              className="p-3 sm:p-4 bg-white rounded-lg border border-gray-300 mb-3 sm:mb-4"
-              ref={qrCodeRef}
-            >
-              <QRCodeCanvas
-                value={JSON.stringify(qrCodeData)}
-                size={window.innerWidth < 640 ? 160 : 200}
-                level="H"
-                includeMargin
-              />
-            </div>
-            
-            <div className="w-full space-y-1 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm">
-              <p><strong>Booking ID:</strong> {bookingInfo.patient.id}</p>
-              <p><strong>Patient:</strong> {bookingInfo.patient.name}</p>
-              <p><strong>NIC:</strong> {bookingInfo.patient.nic}</p>
-              <p><strong>Hospital:</strong> {bookingInfo.patient.hospital}</p>
-              <p><strong>Department:</strong> {bookingInfo.patient.department}</p>
-              <p><strong>Date & Time:</strong> {formData.date} {formData.time}</p>
-              <p><strong>Location:</strong> {bookingInfo.slot.location}</p>
-            </div>
+          <input 
+            type="text" 
+            name="nic"
+            placeholder="NIC" 
+            value={formData.nic}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+            required
+            minLength={MIN_NIC_LENGTH}
+          />
+          
+          <input 
+            type="tel" 
+            name="number"
+            placeholder="Mobile Number" 
+            value={formData.number}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+            required
+            minLength={MIN_PHONE_LENGTH}
+          />
+          
+          <input 
+            type="text" 
+            name="hospital"
+            placeholder="Hospital" 
+            value={formData.hospital}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+            required
+          />
+          
+          <select
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+            required
+            disabled={configLoading}
+          >
+            {configLoading ? (
+              <option value="">Loading...</option>
+            ) : (
+              availableDepartments.map((dept) => (
+                <option key={dept.id} value={dept.name}>{dept.name}</option>
+              ))
+            )}
+          </select>
+          
+          <select
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base"
+            required
+            disabled={configLoading || availableLocations.length === 0}
+          >
+            {availableLocations.length === 0 ? (
+              <option value="">Loading locations...</option>
+            ) : (
+              <>
+                {availableLocations.map((loc) => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </>
+            )}
+          </select>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
-              <button 
-                onClick={downloadQRCode}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <input 
+              type="date" 
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+              required
+              min={new Date().toISOString().split('T')[0]}
+            />
+            <input 
+              type="time" 
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm sm:text-base" 
+              required
+              min={WORKING_HOURS.start}
+              max={WORKING_HOURS.end}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={`w-full ${loading ? 'bg-gray-300' : 'bg-teal-500 hover:bg-teal-600 text-white'} transition-colors py-3 rounded-lg font-semibold text-sm sm:text-base`}
+          >
+            {loading ? 'Booking...' : configLoading ? 'Loading...' : 'Book Now'}
+          </button>
+        </form>
+
+        {success && qrCodeData && bookingInfo && (
+          <div ref={qrCodeSectionRef}
+          className="w-full max-w-lg mt-6 sm:mt-8 p-4 sm:p-6 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="text-lg sm:text-xl font-semibold text-center mb-3 sm:mb-4">Your Booking QR Code</h3>
+            
+            <div className="flex flex-col items-center">
+              <div 
+                className="p-3 sm:p-4 bg-white rounded-lg border border-gray-300 mb-3 sm:mb-4"
+                ref={qrCodeRef}
               >
-                Download QR Code
-              </button>
-              <button 
-                onClick={() => navigate(`/queue`)}
-                className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
-              >
-                Track Booking
-              </button>
+                <QRCodeCanvas
+                  value={JSON.stringify(qrCodeData)}
+                  size={window.innerWidth < 640 ? 160 : 200}
+                  level="H"
+                  includeMargin
+                />
+              </div>
+              
+              <div className="w-full space-y-1 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-sm">
+                <p><strong>Booking ID:</strong> {bookingInfo.patient.id}</p>
+                <p><strong>Patient:</strong> {bookingInfo.patient.name}</p>
+                <p><strong>NIC:</strong> {bookingInfo.patient.nic}</p>
+                <p><strong>Hospital:</strong> {bookingInfo.patient.hospital}</p>
+                <p><strong>Department:</strong> {bookingInfo.patient.department}</p>
+                <p><strong>Date & Time:</strong> {formData.date} {formData.time}</p>
+                <p><strong>Location:</strong> {bookingInfo.slot.location}</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full">
+                <button 
+                  onClick={downloadQRCode}
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
+                >
+                  Download QR Code
+                </button>
+                <button 
+                  onClick={() => navigate(`/queue`)}
+                  className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 sm:px-6 rounded-lg font-semibold text-sm sm:text-base flex-1"
+                >
+                  Track Booking
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </div>
   );
 };
