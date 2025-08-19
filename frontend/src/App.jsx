@@ -1,3 +1,72 @@
+// import { useState } from 'react';
+// import './App.css';
+// import { BrowserRouter, Route, Routes } from 'react-router-dom';
+// import { I18nextProvider } from 'react-i18next';
+// import TrackQueue from './BookingComponents/TrackQueue';
+// import BookingAppointment from './BookingComponents/BookingAppointment';
+// import MyAppointment from './BookingComponents/MyAppointment';
+// import Finder from './Admin/Finder';
+// import Profile from './UserProfile/Profile';
+// import LanguageSelection from './UserProfile/LanguageSelection';
+// import Firstvist from './UserProfile/Firstvist';
+// import Register from './BookingComponents/Register';
+// import SignIn from './UserProfile/SignIn';
+// import Home from './Home';
+// import OnboardingPage from './OnboardingPage';
+// import OnboardingPage2 from './OnboardingPage2';
+// import Signup from './pages/Signup';
+// import SlotConfig from './Admin/SlotConfig';
+// import i18n from './i18n';
+// import AttendanceScanner from './Admin/AttendanceScanner'
+// import QRCodePage from './pages/QRCodePage';
+// import AdminDashboard from './Admin/admin';
+// import PredefinedNotifications from './Admin/adminmessage';
+// import Adminqueue from './Admin/adminqueue';
+// import AdminSettings from './Admin/adminform.jsx';
+// import AdminLogout from './Admin/logout.jsx';
+
+
+// import { AuthProvider } from './AuthContext';
+
+
+// function App() {
+//   const [count, setCount] = useState(0);
+
+//   return (
+//     <I18nextProvider i18n={i18n}>
+//       <BrowserRouter>
+//         <Routes>
+//           <Route path='/queue' element={<TrackQueue />} />
+//           <Route path='/signup' element={<Signup />} />
+//           <Route path='/BookingAppointment' element={<BookingAppointment />} />
+//           <Route path='/MyAppointment' element={<MyAppointment />} />
+//           <Route path='/Finder' element={<Finder />} />
+//           <Route path='/SlotConfig' element={<SlotConfig />} />
+//           <Route path='/profile' element={<Profile/>} />
+//           <Route path='/LanguageSelection' element={<LanguageSelection/>} />
+//           <Route path='/Firstvist' element={<Firstvist/>} />
+//           <Route path='/Register' element={<Register/>} />
+//           <Route path='/SignIn' element={<SignIn />}/>
+//           <Route path='/home' element={<Home />} />
+//           <Route path='/' element={<OnboardingPage />} />
+//           <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
+//           <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
+//           <Route path='/qr' element={<QRCodePage />} />
+//           <Route path='/admin' element={<AdminDashboard />} />
+//           <Route path='/adminmessage' element={<PredefinedNotifications />} />
+//           <Route path='/adminqueue' element={<Adminqueue />} />
+//           <Route path='/adminsettings' element={<AdminSettings />} />
+//           <Route path='/adminlogout' element={<AdminLogout />} />
+//         </Routes>
+//       </BrowserRouter>
+//     </I18nextProvider>
+//   );
+// }
+
+// export default App;
+
+
+
 import { useState } from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -17,46 +86,48 @@ import OnboardingPage2 from './OnboardingPage2';
 import Signup from './pages/Signup';
 import SlotConfig from './Admin/SlotConfig';
 import i18n from './i18n';
-import AttendanceScanner from './Admin/AttendanceScanner'
+import AttendanceScanner from './Admin/AttendanceScanner';
 import QRCodePage from './pages/QRCodePage';
 import AdminDashboard from './Admin/admin';
 import PredefinedNotifications from './Admin/adminmessage';
 import Adminqueue from './Admin/adminqueue';
 import AdminSettings from './Admin/adminform.jsx';
 import AdminLogout from './Admin/logout.jsx';
-
+import { AuthProvider } from './AuthContext';
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <BrowserRouter>
-        <Routes>
-          <Route path='/queue' element={<TrackQueue />} />
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/BookingAppointment' element={<BookingAppointment />} />
-          <Route path='/MyAppointment' element={<MyAppointment />} />
-          <Route path='/Finder' element={<Finder />} />
-          <Route path='/SlotConfig' element={<SlotConfig />} />
-          <Route path='/profile' element={<Profile/>} />
-          <Route path='/LanguageSelection' element={<LanguageSelection/>} />
-          <Route path='/Firstvist' element={<Firstvist/>} />
-          <Route path='/Register' element={<Register/>} />
-          <Route path='/SignIn' element={<SignIn />}/>
-          <Route path='/home' element={<Home />} />
-          <Route path='/' element={<OnboardingPage />} />
-          <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
-          <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
-          <Route path='/qr' element={<QRCodePage />} />
-          <Route path='/admin' element={<AdminDashboard />} />
-          <Route path='/adminmessage' element={<PredefinedNotifications />} />
-          <Route path='/adminqueue' element={<Adminqueue />} />
-          <Route path='/adminsettings' element={<AdminSettings />} />
-          <Route path='/adminlogout' element={<AdminLogout />} />
-        </Routes>
-      </BrowserRouter>
-    </I18nextProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <I18nextProvider i18n={i18n}>
+          <Routes>
+            <Route path='/queue' element={<TrackQueue />} />
+            <Route path='/signup' element={<Signup />} />
+            <Route path='/BookingAppointment' element={<BookingAppointment />} />
+            <Route path='/MyAppointment' element={<MyAppointment />} />
+            <Route path='/Finder' element={<Finder />} />
+            <Route path='/SlotConfig' element={<SlotConfig />} />
+            <Route path='/profile' element={<Profile/>} />
+            <Route path='/LanguageSelection' element={<LanguageSelection/>} />
+            <Route path='/Firstvist' element={<Firstvist/>} />
+            <Route path='/Register' element={<Register/>} />
+            <Route path='/SignIn' element={<SignIn />}/>
+            <Route path='/home' element={<Home />} />
+            <Route path='/' element={<OnboardingPage />} />
+            <Route path='/OnboardingPage2' element={<OnboardingPage2 />} />
+            <Route path='/AttendanceScanner' element={<AttendanceScanner />} />
+            <Route path='/qr' element={<QRCodePage />} />
+            <Route path='/admin' element={<AdminDashboard />} />
+            <Route path='/adminmessage' element={<PredefinedNotifications />} />
+            <Route path='/adminqueue' element={<Adminqueue />} />
+            <Route path='/adminsettings' element={<AdminSettings />} />
+            <Route path='/adminlogout' element={<AdminLogout />} />
+          </Routes>
+        </I18nextProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

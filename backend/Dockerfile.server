@@ -1,0 +1,36 @@
+# Use Debian (glibc) to avoid musl/glibc headaches with native modules
+FROM node:18-bullseye-slim
+
+# Build deps for native modules (bcrypt uses node-gyp)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Show platform/arch in build logs (debugging)
+RUN node -p "process.platform + ' ' + process.arch"
+
+# Copy manifests first for better caching
+COPY package*.json ./
+
+# Make absolutely sure we do a clean, deterministic install
+RUN rm -rf /root/.npm && npm cache clean --force
+RUN npm ci
+
+# Copy the rest of the source (node_modules is not copied due to .dockerignore)
+COPY . .
+
+# Safety: if any stray bcrypt.node was committed, remove it
+# (bcrypt normally lives under bcrypt/lib/binding/...; a top-level bcrypt.node is suspicious)
+RUN find /app/node_modules -maxdepth 2 -name "bcrypt.node" -type f -print -delete || true
+
+# Force rebuild of bcrypt for THIS image/arch
+ENV npm_config_build_from_source=true
+RUN npm rebuild bcrypt --build-from-source
+
+# Sanity check: require bcrypt at build time so the image fails early if wrong
+RUN node -e "console.log('bcrypt ok:', !!require('bcrypt'))"
+
+EXPOSE 5001
+CMD ["npm","start"]
