@@ -492,13 +492,14 @@
 // }
 
 import React, { useState, useEffect } from "react";
-import { Home, ClipboardList, MessageSquare, Settings, LogOut, Clock, QrCode, Search } from "lucide-react";
+import { Home, ClipboardList, MessageSquare, Settings, LogOut, Clock, QrCode, Search, MapPinPlus } from "lucide-react";
 import TealWaveBackground from "../Components/TealWaveBackground";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import AttendanceScanner from "./AttendanceScanner";
 import AdminQueue from "./adminqueue";
-import slotConfig from "./slotConfig";
+import Finder from "./Finder";
+import SlotConfig from "./slotConfig";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -614,10 +615,11 @@ export default function AdminDashboard() {
               <ClipboardList className="w-6 h-6 text-teal-700" />
             </button>
             <button 
+              onClick={() => setActiveTab('config')}
               className="p-3 hover:bg-teal-100 rounded-xl"
               title="Messages"
             >
-              <MessageSquare className="w-6 h-6 text-teal-700" />
+              <MapPinPlus className="w-6 h-6 text-teal-700" />
             </button>
             <button 
               className="p-3 hover:bg-teal-100 rounded-xl"
@@ -715,8 +717,8 @@ export default function AdminDashboard() {
             )}
 
             {activeTab === 'scanner' && <AttendanceScanner />}
-            {activeTab === 'queue' && <AdminQueue />}
-            {activeTab === 'config' && <slotConfig />}
+            {activeTab === 'queue' && <Finder />}
+            {activeTab === 'config' && <SlotConfig />}
           </div>
         </main>
 
@@ -744,7 +746,7 @@ export default function AdminDashboard() {
           
           <div className="w-full px-4">
             <h3 className="font-semibold text-gray-700 mb-4">Quick Actions</h3>
-            <button className="w-full bg-teal-500 text-white py-2 rounded-lg mb-2 hover:bg-teal-600 transition-colors">
+            <button className="w-full bg-teal-500 text-white py-2 rounded-lg mb-2 hover:bg-teal-600 transition-colors" >
               Add New Appointment
             </button>
             <button className="w-full bg-white border border-teal-500 text-teal-500 py-2 rounded-lg hover:bg-teal-50 transition-colors">
